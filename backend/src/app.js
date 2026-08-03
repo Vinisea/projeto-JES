@@ -1,11 +1,8 @@
-import "./models/index.js"; //Quando adicionar os modelos vai pegar já
 import express from "express";
 import cors from "cors";
 
-//Bancop de dados
-import { conn } from "./config/conn.js";
-
 //Rotas
+
 
 const app = express();
 
@@ -17,12 +14,14 @@ app.use(
   }),
 );
 
-conn.sync();
-
 app.use(express.json());
 
 //Rotas quando estiverem definidas
-app.use();
-app.use();
+// app.use();
+// app.use();
+
+app.use((req, res) => {
+  res.status(404).json({ message: "Rota não encontrada" });
+});
 
 export default app;
