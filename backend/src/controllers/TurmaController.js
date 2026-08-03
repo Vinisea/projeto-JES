@@ -1,0 +1,7 @@
+listar()
+
+criar()
+
+editar()
+
+remover()

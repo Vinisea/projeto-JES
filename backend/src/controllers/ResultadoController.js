@@ -1,0 +1,7 @@
+registrar()
+
+buscar()
+
+editar()
+
+remover()
