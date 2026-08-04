@@ -1,8 +1,8 @@
 import express from "express";
 import cors from "cors";
+import routes from "./routes/index.js"
 
 //Rotas
-
 
 const app = express();
 
@@ -16,9 +16,9 @@ app.use(
 
 app.use(express.json());
 
-//Rotas quando estiverem definidas
-// app.use();
-// app.use();
+
+app.use("/api", routes);
+
 
 app.use((req, res) => {
   res.status(404).json({ message: "Rota não encontrada" });

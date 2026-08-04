@@ -1,4 +1,4 @@
-// import AuthService from "../services/AuthService.js";
+import AuthService from "../services/AuthService.js";
 
 class AuthController {
     async login(req, res) {}
