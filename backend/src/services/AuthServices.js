@@ -1,11 +1,11 @@
-class AuthService {
+export const login = async (email, senha) => {
 
-    async login(email, senha) {}
+};
 
-    async logout(usuarioId) {}
+export const logout = async (usuarioId) => {
 
-    async me(usuarioId) {}
+};
 
-}
+export const me = async (usuarioId) => {
 
-export default new AuthService();
+};

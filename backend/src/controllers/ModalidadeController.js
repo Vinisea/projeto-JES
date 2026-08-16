@@ -1,9 +1,19 @@
-listar()
+export const listarModalidades = async (req, res) => {
 
-buscar()
+};
 
-criar()
+export const buscarModalidadePorId = async (req, res) => {
 
-editar()
+};
 
-remover()
+export const criarModalidade = async (req, res) => {
+
+};
+
+export const editarModalidade = async (req, res) => {
+
+};
+
+export const removerModalidade = async (req, res) => {
+
+};

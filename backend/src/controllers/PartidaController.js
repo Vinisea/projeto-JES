@@ -1,15 +1,31 @@
-listar()
+export const listarPartidas = async (req, res) => {
+    
+};
 
-buscar()
+export const buscarPartidaPorId = async (req, res) => {
+    
+};
 
-criar()
+export const criarPartida = async (req, res) => {
+    
+};
 
-editar()
+export const editarPartida = async (req, res) => {
+    
+};
 
-remover()
+export const removerPartida = async (req, res) => {
+    
+};
 
-iniciar()
+export const iniciarPartida = async (req, res) => {
+    
+};
 
-encerrar()
+export const encerrarPartida = async (req, res) => {
+    
+};
 
-atualizarPlacar()
+export const atualizarPlacar = async (req, res) => {
+    
+};

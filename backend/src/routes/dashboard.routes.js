@@ -1,12 +1,18 @@
 import { Router } from "express";
-import DashboardController from "../controllers/DashboardController.js";
+
+import {
+    dashboard,
+    estatisticas,
+    proximosJogos
+} from "../controllers/DashboardController.js";
+
 
 const router = Router();
 
-router.get("/", DashboardController.dashboard);
 
-router.get("/estatisticas", DashboardController.estatisticas);
+router.get("/", dashboard);
+router.get("/estatisticas", estatisticas);
+router.get("/proximos-jogos", proximosJogos);
 
-router.get("/proximos-jogos", DashboardController.proximosJogos);
 
 export default router;

@@ -1,9 +1,19 @@
-listar()
+export const listarGrupos = async (req, res) => {
 
-criar()
+};
 
-sortear()
+export const criarGrupo = async (req, res) => {
 
-editar()
+};
 
-remover()
+export const sortearGrupos = async (req, res) => {
+
+};
+
+export const editarGrupo = async (req, res) => {
+
+};
+
+export const removerGrupo = async (req, res) => {
+
+};

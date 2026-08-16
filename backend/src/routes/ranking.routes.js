@@ -1,12 +1,16 @@
 import { Router } from "express";
-import RankingController from "../controllers/RankingController.js";
+import { 
+    listarRankingGeral,
+    listarRankingPorGrupo,
+    listarRankingPorModalidade,
+    listarRankingPorTurma
+ } from "../controllers/RankingController.js";
 
 const router = Router();
 
-router.get("/", RankingController.geral);
-
-router.get("/modalidade/:id", RankingController.porModalidade);
-
-router.get("/grupo/:id", RankingController.porGrupo);
+router.get("/", listarRankingGeral);
+router.get("/", listarRankingPorGrupo);
+router.get("/", listarRankingPorModalidade);
+router.get("/", listarRankingPorTurma);
 
 export default router;

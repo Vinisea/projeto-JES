@@ -1,9 +1,9 @@
-listar()
+export const listarUsuario = async (req, res) => {}
 
-buscarPorId()
+export const buscarUsuarioPorId = async (req, res) => {}
 
-criar()
+export const criarUsuario = async (req, res) => {}
 
-editar()
+export const editarUsuario = async (req, res) => {}
 
-remover()
+export const removerUsuario = async (req, res) => {}

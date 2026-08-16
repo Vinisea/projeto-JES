@@ -1,12 +1,25 @@
 import { Router } from "express";
-import AtletaController from "../controllers/AtletaController.js";
+
+import {
+    listarAtletas,
+    buscarAtletaPorId,
+    criarAtleta,
+    editarAtleta,
+    removerAtleta,
+    transferirEquipe
+} from "../controllers/AtletaController.js";
+
 
 const router = Router();
 
-router.get("/", AtletaController.listar);
-router.get("/:id", AtletaController.buscarPorId);
-router.post("/", AtletaController.criar);
-router.put("/:id", AtletaController.atualizar);
-router.delete("/:id", AtletaController.remover);
+
+router.get("/", listarAtletas);
+router.get("/:id", buscarAtletaPorId);
+router.post("/", criarAtleta);
+router.put("/:id", editarAtleta);
+router.delete("/:id", removerAtleta);
+
+router.patch("/:id/equipe", transferirEquipe);
+
 
 export default router;

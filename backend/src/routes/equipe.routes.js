@@ -1,21 +1,32 @@
 import { Router } from "express";
-import EquipeController from "../controllers/EquipeController.js";
+
+import {
+    listarEquipes,
+    buscarEquipePorId,
+    criarEquipe,
+    editarEquipe,
+    removerEquipe,
+    adicionarAtleta,
+    removerAtleta,
+    listarAtletas
+} from "../controllers/EquipeController.js";
+
 
 const router = Router();
 
-router.get("/", EquipeController.listar);
-router.get("/:id", EquipeController.buscarPorId);
 
-router.post("/", EquipeController.criar);
+router.get("/", listarEquipes);
+router.get("/:id", buscarEquipePorId);
 
-router.put("/:id", EquipeController.atualizar);
+router.post("/", criarEquipe);
 
-router.delete("/:id", EquipeController.remover);
+router.put("/:id", editarEquipe);
 
-router.get("/:id/atletas", EquipeController.listarAtletas);
+router.delete("/:id", removerEquipe);
 
-router.post("/:id/atletas", EquipeController.adicionarAtleta);
+router.get("/:id/atletas", listarAtletas);
+router.post("/:id/atletas", adicionarAtleta);
+router.delete("/:id/atletas/:atletaId", removerAtleta);
 
-router.delete("/:id/atletas/:atletaId", EquipeController.removerAtleta);
 
 export default router;

@@ -1,7 +1,13 @@
-geral()
+export const listarRankingGeral = async (req, res) => {
+};
 
-modalidade()
+export const listarRankingPorModalidade = async (req, res) => { 
+};
 
-grupo()
 
-turma()
+export const listarRankingPorGrupo = async (req, res) => {
+};
+
+
+export const listarRankingPorTurma = async (req, res) => {
+};
