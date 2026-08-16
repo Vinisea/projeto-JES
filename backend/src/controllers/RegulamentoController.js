@@ -1,3 +1,3 @@
-buscar()
+export const buscarRegulamento = async(req, res) => {}
 
-editar()
+export const editarRegulamento = async(req, res) => {}

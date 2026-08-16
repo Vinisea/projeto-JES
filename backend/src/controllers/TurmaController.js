@@ -1,7 +1,10 @@
-listar()
+export const listarTurma = async(req, res) => {}
 
-criar()
+export const criarTurma = async(req, res) => {}
 
-editar()
+export const editarTurma = async(req, res) => {}
 
-remover()
+export const removerTurma= async(req, res) => {}
+
+export const buscarTurmaPorId= async(req, res) => {}
+

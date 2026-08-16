@@ -1,22 +1,27 @@
 import { Router } from "express";
-import PartidaController from "../controllers/PartidaController.js";
+
+import {
+    listarPartidas,
+    buscarPartidaPorId,
+    criarPartida,
+    editarPartida,
+    removerPartida,
+    iniciarPartida,
+    encerrarPartida,
+    atualizarPlacar
+} from "../controllers/PartidaController.js";
+
 
 const router = Router();
 
-router.get("/", PartidaController.listar);
+router.get("/", listarPartidas);
+router.get("/:id", buscarPartidaPorId);
+router.post("/", criarPartida);
+router.put("/:id", editarPartida);
+router.delete("/:id", removerPartida);
+router.patch("/:id/iniciar", iniciarPartida);
+router.patch("/:id/encerrar", encerrarPartida);
+router.patch("/:id/placar", atualizarPlacar);
 
-router.get("/:id", PartidaController.buscarPorId);
-
-router.post("/", PartidaController.criar);
-
-router.put("/:id", PartidaController.atualizar);
-
-router.delete("/:id", PartidaController.remover);
-
-router.patch("/:id/iniciar", PartidaController.iniciar);
-
-router.patch("/:id/placar", PartidaController.registrarPlacar);
-
-router.patch("/:id/encerrar", PartidaController.encerrar);
 
 export default router;

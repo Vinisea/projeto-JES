@@ -1,5 +1,7 @@
-jogosAoVivo()
+export const telaoController = () => {
+    jogosAoVivo()
 
-proximosJogos()
+    proximosJogos()
 
-placares()
+    placares()
+}

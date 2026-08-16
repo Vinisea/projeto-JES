@@ -1,11 +1,20 @@
-import AuthService from "../services/AuthService.js";
+import {
+    login,
+    logout,
+    me
+} from "../services/AuthServices.js";
 
-class AuthController {
-    async login(req, res) {}
 
-    async logout(req, res) {}
+export const loginUsuario = async (req, res) => {
 
-    async me(req, res) {}
-}
+};
 
-export default new AuthController();
+
+export const logoutUsuario = async (req, res) => {
+
+};
+
+
+export const usuarioLogado = async (req, res) => {
+
+};

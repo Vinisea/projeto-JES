@@ -1,7 +1,9 @@
-registrar()
+export const resultadoController = () => {
+    registrar()
 
-buscar()
+    buscar()
 
-editar()
+    editar()
 
-remover()
+    remover()
+}
