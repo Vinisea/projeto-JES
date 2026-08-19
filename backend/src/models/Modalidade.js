@@ -13,6 +13,7 @@ export const modalidade = conn.define(
     nome_modalidade: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
         validate: {
             notEmpty: {msg: "O nome da modalidade é obrigatório"}
         }
