@@ -3,6 +3,7 @@ import { modalidade } from "./Modalidade.js";
 import { atleta } from "./Atleta.js";
 import { confronto } from "./Confronto.js";
 import { usuario } from "./Usuario.js";
+import { inscricao } from "./Inscricao.js";
 
 //Relacionamento: Usuário -> Equipe (1:N)
 usuario.hasMany(equipe, {foreignKey: 'id_usuario', as: 'equipes'})
