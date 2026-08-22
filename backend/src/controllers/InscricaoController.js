@@ -7,7 +7,6 @@ export const criarInscricao = async (req, res, next) => {
     try {
         const { id_equipe, id_modalidade } = req.body;
 
-        // Verifica se a equipe existe
         const equipeEncontrada = await equipe.findByPk(id_equipe);
 
         if (!equipeEncontrada) {
@@ -16,7 +15,6 @@ export const criarInscricao = async (req, res, next) => {
             });
         }
 
-        // Verifica se a modalidade existe
         const modalidadeEncontrada = await modalidade.findByPk(id_modalidade);
 
         if (!modalidadeEncontrada) {
@@ -25,7 +23,19 @@ export const criarInscricao = async (req, res, next) => {
             });
         }
 
-        // Cria a inscrição
+        const inscricaoExistente = await inscricao.findOne({
+            where: {
+                id_equipe,
+                id_modalidade
+            }
+        });
+
+        if (inscricaoExistente) {
+            return res.status(409).json({
+                message: "A equipe já está inscrita nesta modalidade"
+            });
+        }
+
         const novaInscricao = await inscricao.create({
             id_equipe,
             id_modalidade
