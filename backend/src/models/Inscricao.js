@@ -13,12 +13,20 @@ export const inscricao = conn.define(
 
         id_equipe: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            references: {
+                model: "equipe",
+                key: "id_equipe"
+            }
         },
 
         id_modalidade: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            references: {
+                model: "Modalidade",
+                key: "id_modalidade"
+            }
         }
     },
     {
