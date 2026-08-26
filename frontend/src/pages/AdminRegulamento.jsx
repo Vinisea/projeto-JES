@@ -1,0 +1,2 @@
+import AdminLayout from "../components/AdminLayout.jsx";
+export default function AdminRegulamento() { return <AdminLayout title="Regulamento" description="Consulte e atualize as regras da competição."><section className="admin-panel full-panel"><h2>Regulamento JES 2026</h2><p className="regulation-text">Os Jogos Internos SESI têm como objetivo promover integração, respeito, participação e espírito esportivo entre os estudantes.</p><button className="panel-button">Editar regulamento</button></section></AdminLayout>; }

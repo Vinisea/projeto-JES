@@ -1,0 +1,2 @@
+import AdminSimplePage from "./AdminSimplePage.jsx";
+export default function AdminAtletas() { return <AdminSimplePage title="Atletas" description="Gerencie os estudantes inscritos nos jogos." button="+ Novo atleta" rows={[["Ana Souza", "9º A • Voleibol"], ["Pedro Lima", "9º B • Fut7"], ["Mariana Costa", "2º EM A • Queimado"]]} />; }
