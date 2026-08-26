@@ -1,2 +1,15 @@
 import AdminSimplePage from "./AdminSimplePage.jsx";
-export default function AdminEquipes() { return <AdminSimplePage title="Equipes" description="Organize as equipes e turmas participantes." button="+ Nova equipe" rows={[["9º B", "Espanha • 150 pts"], ["9º A", "Inglaterra • 100 pts"], ["2º EM A", "Argentina • 70 pts"]]} />; }
+export default function AdminEquipes() {
+  return (
+    <AdminSimplePage
+      title="Equipes"
+      description="Organize as equipes e turmas participantes."
+      button="+ Nova equipe"
+      rows={[
+        ["9º B", "Espanha • 150 pts"],
+        ["9º A", "Inglaterra • 100 pts"],
+        ["2º EM A", "Argentina • 70 pts"],
+      ]}
+    />
+  );
+}
