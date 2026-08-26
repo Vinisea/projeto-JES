@@ -65,8 +65,19 @@ export const confronto = conn.define('Confronto', {
   id_equipe_2: {
     type: DataTypes.INTEGER,
     allowNull: false
+  },
+
+  id_modalidade: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+
+  id_grupo: {
+    type: DataTypes.INTEGER,
+    allowNull: false
   }
-}, {
+
+  },  {
   tableName: 'confronto',
   timestamps: false
 });

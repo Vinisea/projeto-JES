@@ -29,6 +29,12 @@ export const equipe = conn.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+
+    id_grupo: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+
   },
   {
     tableName: "equipe",
