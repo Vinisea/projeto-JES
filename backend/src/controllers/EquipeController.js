@@ -81,11 +81,11 @@ export const adicionarAtleta = async (req, res) => {
 
     try {
         const equipeAlvo = await equipe.findByPk(equipeId);
-        if (!equipeAlvo) res.status(404).json({msg: "Equipe não encontrada"});
+        if (!equipeAlvo) return res.status(404).json({msg: "Equipe não encontrada"});
 
         const novoAtleta = await atleta.create({
             ...req.body,
-            equipeId
+            id_equipe: equipeId
         });
         return res.status(201).json(novoAtleta)
     } catch (error) {
