@@ -79,25 +79,6 @@ confronto.belongsTo(equipe, {
     as: "equipe_visitante"
 });
 
-// Relacionamento: Modalidade -> Grupo (1:N)
-modalidade.hasMany(grupo, {foreignKey: "id_modalidade", as: "grupos"})
-grupo.belongsTo(modalidade, {foreignKey: "id_modalidade", as: "modalidade"})
-
-// Relacionamento: Grupo <-> Equipe (N:M via tabela intermediaria: 'grupo_equipe)
-grupo.belongsToMany(equipe, {
-    throught: "grupo_equipe",
-    foreignKey: 'id_grupo',
-    otherKey: 'id_grupo',
-    as: 'equipes'
-})
-
-equipe.belongsToMany(grupo, {
-    trhought: 'grupo_equipe',
-    foreignKey: 'id_equipe',
-    otherKey: 'id_grupo',
-    as: 'grupos'
-})
-
 export {
     usuario,
     equipe,
