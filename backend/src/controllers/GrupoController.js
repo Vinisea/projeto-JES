@@ -128,4 +128,81 @@ export const removerEquipeDoGrupo = async (req, res) => {
   }
 };
 
-export const sortearGrupos = async (req, res) => {};
+//Sorteio automático de grupos
+export const sortearGrupos = async (req, res) => {
+    const { id_modalidade, quantidade_grupos } = req.body;
+
+  try {
+    if (!id_modalidade) {
+      return res.status(400).json({ msg: "O 'id_modalidade' é obrigatório para realizar o sorteio." });
+    }
+
+    // 1. Busca a modalidade e todas as equipes inscritas nela
+    const modalidade = await modalidade.findByPk(id_modalidade, {
+      include: { model: equipe, as: 'equipes' }
+    });
+
+    if (!modalidade) {
+      return res.status(404).json({ msg: "Modalidade não encontrada." });
+    }
+
+    const equipes = modalidade.equipes;
+    if (!equipes || equipes.length === 0) {
+      return res.status(400).json({ msg: "Não há equipes inscritas nesta modalidade para sortear." });
+    }
+
+    // 2. Busca os grupos existentes dessa modalidade
+    let grupos = await grupo.findAll({ where: { id_modalidade } });
+
+    // Se 'quantidade_grupos' for passada e faltarem grupos, cria os que faltam (ex: Grupo A, Grupo B...)
+    if (quantidade_grupos && quantidade_grupos > 0) {
+      const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      while (grupos.length < quantidade_grupos) {
+        const indiceLetra = grupos.length;
+        const nomeGrupo = `Grupo ${letras[indiceLetra] || indiceLetra + 1}`;
+        const novoGrupo = await grupo.create({
+          nome: nomeGrupo,
+          id_modalidade
+        });
+        grupos.push(novoGrupo);
+      }
+    }
+
+    if (grupos.length === 0) {
+      return res.status(400).json({
+        msg: "Nenhum grupo encontrado para esta modalidade. Crie os grupos antes ou informe 'quantidade_grupos'."
+      });
+    }
+
+    // 3. Embaralha as equipes usando o algoritmo Math.random
+    const equipesEmbaralhadas = [...equipes].sort(() => Math.random() - 0.5);
+
+    // 4. Limpa distribuições anteriores dos grupos envolvidos
+    for (const grupo of grupos) {
+      await grupo.setEquipes([]);
+    }
+
+    // 5. Distribui as equipes ciclicamente entre os grupos (Round-Robin)
+    for (let i = 0; i < equipesEmbaralhadas.length; i++) {
+      const grupoDestino = grupos[i % grupos.length];
+      await grupoDestino.addEquipe(equipesEmbaralhadas[i]);
+    }
+
+    // 6. Retorna o resultado final do sorteio
+    const resultado = await grupo.findAll({
+      where: { id_modalidade },
+      include: {
+        model: equipe,
+        as: 'equipes',
+        through: { attributes: [] }
+      }
+    });
+
+    return res.status(200).json({
+      msg: "Sorteio de grupos realizado com sucesso!",
+      grupos: resultado
+    });
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
