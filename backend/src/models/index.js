@@ -78,7 +78,6 @@ confronto.belongsTo(equipe, {
     foreignKey: "id_equipe_2",
     as: "equipe_visitante"
 });
-
 export {
     usuario,
     equipe,
