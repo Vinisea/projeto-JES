@@ -71,4 +71,61 @@ export const removerGrupo = async (req, res) => {
   }
 };
 
+//Gestão de equipes dentro do grupo
+export const listarEquipesDoGrupo = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const grupo = await grupo.findByPk(id, {
+      include: {
+        model: equipe,
+        as: 'equipes',
+        through: { attributes: [] }
+      }
+    });
+
+    if (!grupo) return res.status(404).json({ msg: "Grupo não encontrado." });
+
+    return res.status(200).json(grupo.equipes);
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
+
+export const adicionarEquipeAoGrupo = async (req, res) => {
+  const { id } = req.params;
+  const { id_equipe } = req.body;
+
+  try {
+    const grupo = await grupo.findByPk(id);
+    if (!grupo) return res.status(404).json({ msg: "Grupo não encontrado." });
+
+    const equipeAlvo = await equipe.findByPk(id_equipe);
+    if (!equipeAlvo) return res.status(404).json({ msg: "Equipe não encontrada." });
+
+    await grupo.addEquipe(equipeAlvo);
+
+    return res.status(201).json({ msg: "Equipe adicionada ao grupo com sucesso!" });
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
+
+export const removerEquipeDoGrupo = async (req, res) => {
+  const { id, equipeId } = req.params;
+
+  try {
+    const grupo = await grupo.findByPk(id);
+    if (!grupo) return res.status(404).json({ msg: "Grupo não encontrado." });
+
+    const equipeAlvo = await equipe.findByPk(equipeId);
+    if (!equipeAlvo) return res.status(404).json({ msg: "Equipe não encontrada." });
+
+    await grupo.removeEquipe(equipeAlvo);
+
+    return res.status(200).json({ msg: "Equipe removida do grupo com sucesso!" });
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
+
 export const sortearGrupos = async (req, res) => {};
