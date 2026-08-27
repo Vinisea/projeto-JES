@@ -7,7 +7,7 @@ import modalidadeRoutes from "./modalidade.routes.js";
 import equipeRoutes from "./equipe.routes.js";
 import atletaRoutes from "./atleta.routes.js";
 import grupoRoutes from "./grupo.routes.js";
-import partidaRoutes from "./partida.routes.js";
+import partidaRoutes from "./confronto.routes.js";
 import rankingRoutes from "./ranking.routes.js";
 import dashboardRoutes from "./dashboard.routes.js";
 import regulamentoRoutes from "./regulamento.routes.js";
