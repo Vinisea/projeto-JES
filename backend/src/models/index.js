@@ -59,7 +59,6 @@ inscricao.belongsTo(modalidade, {
 
 
 // Relacionamento: Equipe -> Confronto (1:N duplo)
-
 equipe.hasMany(confronto, {
     foreignKey: "id_equipe_1",
     as: "confrontos_como_mandante"

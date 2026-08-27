@@ -41,7 +41,7 @@ export const usuario = conn.define(
         validate: {
             isIn: {
                 args: [['Administrador', 'Arbitro', 'Docente']],
-                msg: "Tipode usuário inválido"
+                msg: "Tipo de usuário inválido"
             }
         }        
     },
