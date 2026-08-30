@@ -168,6 +168,7 @@ export const listarRankingPorModalidade = async (req, res) => {
   }
 };
 
+
 // Tabela de pontuação geral por posição na modalidade
 const TABELA_PONTOS_GERAL = {
   1: 10, // 1º lugar ganha 10 pontos gerais
@@ -265,4 +266,10 @@ export const listarRankingGeral = async (req, res) => {
   } catch (error) {
     errorHandler(error, res);
   }
+};
+
+
+export const listarRankingPorTurma = async (req, res) => {
+  // Caso tenham pontuação por turma geral do colégio
+  return res.status(501).json({ msg: "Ranking por turma ainda não implementado." });
 };
