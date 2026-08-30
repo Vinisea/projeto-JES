@@ -167,3 +167,102 @@ export const listarRankingPorModalidade = async (req, res) => {
     errorHandler(error, res);
   }
 };
+
+// Tabela de pontuação geral por posição na modalidade
+const TABELA_PONTOS_GERAL = {
+  1: 10, // 1º lugar ganha 10 pontos gerais
+  2: 7,  // 2º lugar ganha 7 pontos gerais
+  3: 5,  // 3º lugar ganha 5 pontos gerais
+  4: 3,  // 4º lugar ganha 3 pontos gerais
+};
+const PONTOS_PARTICIPACAO = 1; // 5º lugar em diante
+
+export const listarRankingGeral = async (req, res) => {
+  try {
+    // 1. Busca todas as modalidades com seus grupos e equipes
+    const modalidades = await modalidade.findAll({
+      include: [
+        {
+          model: grupo,
+          as: "grupos",
+          include: [{ model: equipe, as: "equipes" }]
+        }
+      ]
+    });
+
+    // Mapa para acumular a pontuação geral de cada equipe/turma
+    // Chave: nome_equipe (ou id_turma / nome_turma)
+    const rankingGeralMap = {};
+
+    // 2. Percorre cada modalidade e cada grupo
+    for (const mod of modalidades) {
+      for (const g of mod.grupos) {
+        // Busca os confrontos finalizados do grupo
+        const confrontos = await confronto.findAll({
+          where: {
+            id_grupo: g.id_grupo,
+            status_confronto: "Finalizado"
+          }
+        });
+
+        // Se não houver jogos finalizados, pula
+        if (confrontos.length === 0) continue;
+
+        // Calcula e classifica as equipes deste grupo especificamente
+        const estatisticas = calcularEstatisticasEquipes(g.equipes, confrontos);
+        const classificacaoGrupo = classificarEquipes(estatisticas);
+
+        // 3. Atribui a pontuação geral baseada na colocação do grupo
+        classificacaoGrupo.forEach((item, index) => {
+          const pos = index + 1; // 1, 2, 3, 4...
+          const pontosGeraisGanhos = TABELA_PONTOS_GERAL[pos] || PONTOS_PARTICIPACAO;
+
+          const nomeEquipe = item.nome_equipe;
+
+          if (!rankingGeralMap[nomeEquipe]) {
+            rankingGeralMap[nomeEquipe] = {
+              equipe: nomeEquipe,
+              pontos_gerais: 0,
+              primeiros_lugares: 0,
+              segundos_lugares: 0,
+              terceiros_lugares: 0,
+              modalidades_disputadas: 0
+            };
+          }
+
+          rankingGeralMap[nomeEquipe].pontos_gerais += pontosGeraisGanhos;
+          rankingGeralMap[nomeEquipe].modalidades_disputadas += 1;
+
+          if (pos === 1) rankingGeralMap[nomeEquipe].primeiros_lugares += 1;
+          if (pos === 2) rankingGeralMap[nomeEquipe].segundos_lugares += 1;
+          if (pos === 3) rankingGeralMap[nomeEquipe].terceiros_lugares += 1;
+        });
+      }
+    }
+
+    // 4. Converte o mapa para Array e Ordena o Ranking Geral
+    const rankingGeralArray = Object.values(rankingGeralMap).sort((a, b) => {
+      // 1º Criterio: Pontos Gerais
+      if (b.pontos_gerais !== a.pontos_gerais) return b.pontos_gerais - a.pontos_gerais;
+      // 2º Criterio: Quantidade de 1ºs lugares (Ouros)
+      if (b.primeiros_lugares !== a.primeiros_lugares) return b.primeiros_lugares - a.primeiros_lugares;
+      // 3º Criterio: Quantidade de 2ºs lugares (Pratas)
+      if (b.segundos_lugares !== a.segundos_lugares) return b.segundos_lugares - a.segundos_lugares;
+      // 4º Criterio: Nome
+      return a.equipe.localeCompare(b.equipe);
+    });
+
+    // 5. Adiciona o rótulo de posição geral (1º, 2º, 3º...)
+    const resultadoComPosicao = rankingGeralArray.map((item, index) => ({
+      posicao: `${index + 1}º`,
+      ...item
+    }));
+
+    return res.status(200).json({
+      titulo: "Ranking Geral do Campeonato",
+      ranking: resultadoComPosicao
+    });
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
