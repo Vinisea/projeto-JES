@@ -82,3 +82,40 @@ const classificarEquipes = (tabelaArray) => {
     ...eq
   }));
 };
+
+
+// ==========================================
+// METODOS DO CONTROLLER
+// ==========================================
+
+export const listarRankingPorGrupo = async (req, res) => {
+  const { grupoId } = req.params;
+
+  try {
+    const grupoEncontrado = await grupo.findByPk(grupoId, {
+      include: [{ model: equipe, as: "equipes" }]
+    });
+
+    if (!grupoEncontrado) {
+      return res.status(404).json({ msg: "Grupo não encontrado." });
+    }
+
+    const confrontos = await confronto.findAll({
+      where: {
+        id_grupo: grupoId,
+        status_confronto: "Finalizado"
+      }
+    });
+
+    const estatisticas = calcularEstatisticasEquipes(grupoEncontrado.equipes, confrontos);
+    const rankingFinal = classificarEquipes(estatisticas);
+
+    return res.status(200).json({
+      grupo: grupoEncontrado.nome_grupo,
+      id_modalidade: grupoEncontrado.id_modalidade,
+      ranking: rankingFinal
+    });
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
