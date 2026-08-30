@@ -119,3 +119,51 @@ export const listarRankingPorGrupo = async (req, res) => {
     errorHandler(error, res);
   }
 };
+
+export const listarRankingPorModalidade = async (req, res) => {
+  const { modalidadeId } = req.params;
+
+  try {
+    const modalidadeEncontrada = await modalidade.findByPk(modalidadeId, {
+      include: [
+        {
+          model: grupo,
+          as: "grupos",
+          include: [{ model: equipe, as: "equipes" }]
+        }
+      ]
+    });
+
+    if (!modalidadeEncontrada) {
+      return res.status(404).json({ msg: "Modalidade não encontrada." });
+    }
+
+    const resultadoPorGrupo = [];
+
+    for (const g of modalidadeEncontrada.grupos) {
+      const confrontos = await confronto.findAll({
+        where: {
+          id_grupo: g.id_grupo,
+          status_confronto: "Finalizado"
+        }
+      });
+
+      const estatisticas = calcularEstatisticasEquipes(g.equipes, confrontos);
+      const rankingFinal = classificarEquipes(estatisticas);
+
+      resultadoPorGrupo.push({
+        id_grupo: g.id_grupo,
+        nome_grupo: g.nome_grupo,
+        ranking: rankingFinal
+      });
+    }
+
+    return res.status(200).json({
+      modalidade: modalidadeEncontrada.nome_modalidade,
+      categoria: modalidadeEncontrada.categoria,
+      grupos: resultadoPorGrupo
+    });
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
