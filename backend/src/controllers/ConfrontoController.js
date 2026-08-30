@@ -226,7 +226,7 @@ export const atualizarPlacar = async (req, res, next) => {
 
         const confrontoAchado = await confronto.findByPk(id);
         if (!confrontoAchado) return res.status(404).json({msg: "Confronto não encontrado"})
-        
+        //Não alterar confronto que não esteja em andamento
         if (confrontoAchado.status_confronto !== "Em Andamento") return res.status(400).json({msg: `Não pe possível alterar o placar de um confronto ${confrontoAchado.status}. O confronto precisa estar 'Em Andamento`})
 
         if (placar_equipe_1 === undefined || placar_equipe_2 === undefined) {
@@ -239,6 +239,41 @@ export const atualizarPlacar = async (req, res, next) => {
             placar_equipe_2: parseInt(placar_equipe_2)
         })
         return res.status(200).json({message: "Placar atualizado com sucesso!", confronto: confrontoAchado})
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+//Finalizar confronto
+//PATCH confronto/:id/finalizar
+export const finalizarConfronto = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const confrontoAchado = await confronto.findByPk(id);
+
+        if (!confrontoAchado) return res.status(404).json({msg: "Confronto não encontrado"})
+        //Não alterar confronto que não esteja em andamento
+        if (confrontoAchado.status_confronto !== "Em Andamento") return res.status(400).json({msg: `Não pe possível alterar o placar de um confronto ${confrontoAchado.status}. O confronto precisa estar 'Em Andamento`})
+
+        //Lógica para identificar a equipe vencedora
+        let id_vencedor = null;
+        if (confrontoAchado.placar_equipe_1 > confrontoAchado.placar_equipe_2) {
+            id_vencedor = confrontoAchado.id_equipe_1
+        } else if (confrontoAchado.placar_equipe_2 > confrontoAchado.placar_equipe_1) {
+            id_vencedor = confrontoAchado.id_equipe_2
+        }
+
+        await confrontoAchado.update({
+            status_confronto: "Finalizado",
+            id_equipe_vencedora: id_vencedor
+        })
+
+        return res.status(200).json({
+            message: "Confronto encerrado com sucesso",
+            vencedor: id_vencedor ? `Equipe ID: ${id_vencedor}` : `Empate`,
+            confronto: confrontoAchado
+        })
     } catch (error) {
         next(error);
     }
