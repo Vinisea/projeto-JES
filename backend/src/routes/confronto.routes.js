@@ -6,9 +6,9 @@ import {
     criarConfronto,
     editarConfronto,
     removerConfronto,
-    // iniciarConfronto,
-    // encerrarConfronto,
-    // atualizarPlacar
+    atualizarPlacar,
+    finalizarConfronto,
+    iniciarConfronto,
     gerarConfrontosDoGrupo
 } from "../controllers/ConfrontoController.js";
 
@@ -26,12 +26,10 @@ router.put("/:id", editarConfronto);
 
 router.delete("/:id", removerConfronto);
 
-// router.patch("/:id/iniciar", iniciarConfronto);
+router.patch("/:id/iniciar", iniciarConfronto);
 
-// router.patch("/:id/encerrar", encerrarConfronto);
+router.patch("/:id/finalizar", finalizarConfronto);
 
-// router.patch("/:id/placar", atualizarPlacar);
-
-
+router.patch("/:id/placar", atualizarPlacar);
 
 export default router;
