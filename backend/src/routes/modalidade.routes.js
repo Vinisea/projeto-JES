@@ -5,7 +5,8 @@ import {
     buscarModalidadePorId,
     criarModalidade,
     editarModalidade,
-    removerModalidade
+    removerModalidade,
+    obterResultadoFinalModalidade
 } from "../controllers/ModalidadeController.js";
 
 
@@ -17,6 +18,7 @@ router.get("/:id", buscarModalidadePorId);
 router.post("/", criarModalidade);
 router.put("/:id", editarModalidade);
 router.delete("/:id", removerModalidade);
+router.get("/:id/resultado-final", obterResultadoFinalModalidade);
 
 
 export default router;
