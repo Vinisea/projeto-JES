@@ -199,3 +199,21 @@ export const removerConfronto = async (req, res, next) => {
 };
 
 
+//Iniciar confronto
+export const iniciarConfronto = async (req, res, next) => {
+    try {
+       const { id } = req.params;
+       const confrontoEncontrado = await confronto.findByPk(id);
+       
+       if (!confrontoEncontrado) return res.status(404).json({msg: "Confornto não encontrado"})
+
+        //regra: só pode iniciar se estiver agendade
+        if (confrontoEncontrado.status_confronto !== "Agendado") return res.status(400).json({msg: `Apenas confrontos com status 'Agendado' podem ser iniciados. Status atual: ${confrontoEncontrado.status_confronto}.`})
+            
+        await confrontoEncontrado.update({ status_confronto: 'Em andamento' });
+        return res.status(200).json({msg: "Confronto inicado com sucesso", confronto: confrontoEncontrado})
+        } catch (error) {
+        next(error)
+    }
+}
+
