@@ -8,9 +8,9 @@ import {
 
 const router = Router();
 
-router.get("/", listarRankingGeral);
-router.get("/", listarRankingPorGrupo);
-router.get("/", listarRankingPorModalidade);
-router.get("/", listarRankingPorTurma);
+router.get("/geral", listarRankingGeral);
+router.get("/grupo/:grupoId", listarRankingPorGrupo);
+router.get("/modalidade/:modalidadeId", listarRankingPorModalidade);
+router.get("/turma/turma:id", listarRankingPorTurma);
 
 export default router;
