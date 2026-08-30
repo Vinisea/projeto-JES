@@ -39,17 +39,18 @@ export const confronto = conn.define('Confronto', {
     }
   },
   fase: {
-    type: DataTypes.ENUM('Quartas', 'Semifinal', 'Final'),
+    type: DataTypes.ENUM('Grupos', 'Quartas', 'Semifinal', 'Final'),
     allowNull: false,
     validate: {
       isIn: {
-        args: [['Quartas', 'Semifinal', 'Final']],
-        msg: "A fase deve ser 'Quartas', 'Semifinal' ou 'Final'."
+        args: [['Grupos', 'Quartas', 'Semifinal', 'Final']],
+        msg: "A fase deve ser 'Grupos', 'Quartas', 'Semifinal' ou 'Final'."
       }
     }
   },
   status_confronto: {
     type: DataTypes.ENUM('Em andamento', 'Agendado', 'Finalizado'),
+    defaultValue: 'Agendado',
     allowNull: false,
     validate: {
       isIn: {
@@ -67,6 +68,11 @@ export const confronto = conn.define('Confronto', {
     allowNull: false
   },
 
+  id_equipe_vencedora: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+
   id_modalidade: {
     type: DataTypes.INTEGER,
     allowNull: false
@@ -74,7 +80,7 @@ export const confronto = conn.define('Confronto', {
 
   id_grupo: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: true //Mata-Mata não tem grupo
   }
 
   },  {
