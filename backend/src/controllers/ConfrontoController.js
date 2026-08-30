@@ -274,17 +274,18 @@ export const atualizarPlacar = async (req, res, next) => {
         const confrontoAchado = await confronto.findByPk(id);
         if (!confrontoAchado) return res.status(404).json({msg: "Confronto não encontrado"})
         //Não alterar confronto que não esteja em andamento
-        if (confrontoAchado.status_confronto !== "Em Andamento") return res.status(400).json({msg: `Não pe possível alterar o placar de um confronto ${confrontoAchado.status}. O confronto precisa estar 'Em Andamento`})
+        if (confrontoAchado.status_confronto !== "Em andamento") return res.status(400).json({msg: `Não pe possível alterar o placar de um confronto ${confrontoAchado.status}. O confronto precisa estar 'Em andamento`})
 
         if (placar_equipe_1 === undefined || placar_equipe_2 === undefined) {
             res.status(400).json({msg: "Informe os campos de 'placar_equipe_1' e 'placar_equipe_2'"})
             return
         }
 
-        await confronto.update({
+        await confrontoAchado.update({
             placar_equipe_1: parseInt(placar_equipe_1),
             placar_equipe_2: parseInt(placar_equipe_2)
-        })
+        });
+        
         return res.status(200).json({message: "Placar atualizado com sucesso!", confronto: confrontoAchado})
     } catch (error) {
         next(error);
@@ -301,7 +302,7 @@ export const finalizarConfronto = async (req, res, next) => {
 
         if (!confrontoAchado) return res.status(404).json({msg: "Confronto não encontrado"})
         //Não alterar confronto que não esteja em andamento
-        if (confrontoAchado.status_confronto !== "Em Andamento") return res.status(400).json({msg: `Não pe possível alterar o placar de um confronto ${confrontoAchado.status}. O confronto precisa estar 'Em Andamento`})
+        if (confrontoAchado.status_confronto !== "Em andamento") return res.status(400).json({msg: `Não pe possível alterar o placar de um confronto ${confrontoAchado.status}. O confronto precisa estar 'Em andamento`})
 
         //Lógica para identificar a equipe vencedora
         let id_vencedor = null;
@@ -325,3 +326,4 @@ export const finalizarConfronto = async (req, res, next) => {
         next(error);
     }
 }
+
