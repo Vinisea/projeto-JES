@@ -9,11 +9,14 @@ import {
     // iniciarConfronto,
     // encerrarConfronto,
     // atualizarPlacar
+    gerarConfrontosDoGrupo
 } from "../controllers/ConfrontoController.js";
 
 const router = Router();
 
 router.get("/", listarConfrontos);
+
+router.post("/gerar", gerarConfrontosDoGrupo);
 
 router.get("/:id", buscarConfrontoPorId);
 
@@ -28,5 +31,7 @@ router.delete("/:id", removerConfronto);
 // router.patch("/:id/encerrar", encerrarConfronto);
 
 // router.patch("/:id/placar", atualizarPlacar);
+
+
 
 export default router;

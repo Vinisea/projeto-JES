@@ -26,6 +26,53 @@ export const gerarPartidas = (equipes, dadosPartida) => {
     return confrontos;
 };
 
+export const gerarConfrontosDoGrupo = async (req, res, next) => {
+    try {
+        const { id_grupo } = req.body;
+
+        const grupoEncontrado = await grupo.findByPk(id_grupo);
+
+        if (!grupoEncontrado) {
+            return res.status(404).json({
+                message: "Grupo não encontrado"
+            });
+        }
+
+        const equipes = await equipe.findAll({
+            where: {
+                id_grupo: id_grupo
+            }
+        });
+
+        if (equipes.length < 2) {
+            return res.status(400).json({
+                message: "O grupo precisa ter pelo menos duas equipes."
+            });
+        }
+
+        const dadosPartida = {
+            id_modalidade: grupoEncontrado.id_modalidade,
+            id_grupo: id_grupo,
+            data_hora: new Date(),
+            local_partida: "A definir",
+            fase: "Quartas",
+            status_confronto: "Agendado"
+        };
+
+        const confrontos = gerarPartidas(equipes, dadosPartida);
+
+        const confrontosCriados = await confronto.bulkCreate(confrontos);
+
+        return res.status(201).json({
+            message: "Confrontos gerados com sucesso.",
+            quantidade: confrontosCriados.length,
+            confrontos: confrontosCriados
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
 
 // Listar todos os confrontos
 export const listarConfrontos = async (req, res, next) => {
