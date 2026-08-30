@@ -8,6 +8,7 @@ const PORT = process.env.PORT;
 
 const iniciarServidor = async () => {
   try {
+    // await conn.sync({ force: true });
     await conn.sync();
 
     app.listen(PORT, () => {
