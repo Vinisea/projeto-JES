@@ -72,3 +72,29 @@ export const calcularEstatisticasEquipes = (equipes, confrontos) => {
   return Object.values(tabelaMap);
 };
 
+
+//Função de classificar equipe
+export const classificarEquipes = (tabelaArray) => {
+  const ordenada = tabelaArray.sort((a, b) => {
+    // 1º Critério: Pontos
+    if (b.pontos !== a.pontos) return b.pontos - a.pontos;
+
+    // 2º Critério: Número de Vitórias
+    if (b.vitorias !== a.vitorias) return b.vitorias - a.vitorias;
+
+    // 3º Critério: Saldo de Gols
+    if (b.saldo !== a.saldo) return b.saldo - a.saldo;
+
+    // 4º Critério: Gols Marcados (Gols Pró)
+    if (b.gols_marcados !== a.gols_marcados) return b.gols_marcados - a.gols_marcados;
+
+    // 5º Critério: Nome (Ordem Alfabética)
+    return a.nome_equipe.localeCompare(b.nome_equipe);
+  });
+
+  // Adiciona o rótulo da posição (ex: 1º EM A, 2º EM A)
+  return ordenada.map((eq, index) => ({
+    posicao: `${index + 1}º`,
+    ...eq
+  }));
+};
