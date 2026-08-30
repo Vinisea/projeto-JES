@@ -217,3 +217,29 @@ export const iniciarConfronto = async (req, res, next) => {
     }
 }
 
+//Atualizar placar/resultado
+//PATCH confronto/:id/atualizar
+export const atualizarPlacar = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { placar_equipe_1, placar_equipe_2 } = req.body;
+
+        const confrontoAchado = await confronto.findByPk(id);
+        if (!confrontoAchado) return res.status(404).json({msg: "Confronto não encontrado"})
+        
+        if (confrontoAchado.status_confronto !== "Em Andamento") return res.status(400).json({msg: `Não pe possível alterar o placar de um confronto ${confrontoAchado.status}. O confronto precisa estar 'Em Andamento`})
+
+        if (placar_equipe_1 === undefined || placar_equipe_2 === undefined) {
+            res.status(400).json({msg: "Informe os campos de 'placar_equipe_1' e 'placar_equipe_2'"})
+            return
+        }
+
+        await confronto.update({
+            placar_equipe_1: parseInt(placar_equipe_1),
+            placar_equipe_2: parseInt(placar_equipe_2)
+        })
+        return res.status(200).json({message: "Placar atualizado com sucesso!", confronto: confrontoAchado})
+    } catch (error) {
+        next(error);
+    }
+}
