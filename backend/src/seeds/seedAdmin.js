@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { usuario } from "../models/Usuario.js";
+import { usuario } from "../models/index.js";
 
 export const criarAdminInicial = async () => {
   try {
