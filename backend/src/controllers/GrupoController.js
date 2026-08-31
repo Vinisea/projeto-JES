@@ -1,4 +1,4 @@
-import { errorHandler } from "../middlewares/errorHandler.js";
+import { errorHandler } from "../utils/errorHandler.js";
 import { equipe, grupo, modalidade } from "../models/index.js";
 
 export const criarGrupo = async (req, res) => {

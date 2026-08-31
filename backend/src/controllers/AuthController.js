@@ -1,6 +1,8 @@
-import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { usuario } from "../models/index.js";
+import { createUserToken } from "../utils/createUserToken.js";
+import { getUserByToken } from "../utils/getUserByToken.js";
+import { getToken } from "../utils/getToken.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "Segredo_Mais_Segredo_Dos_Jogos_Internos"; //kkkkkkk
 
@@ -14,38 +16,24 @@ export const loginUsuario = async (req, res, next) => {
         .json({ msg: "O email e a senha são obriogatórios" });
     }
 
-    const usuarioEmail = await usuario.findOne({ where: { email: email } });
-    if (!usuarioEmail) {
+    //Encontra usuario
+    const usuarioEncontrado = await usuario.scope("comSenha").findOne({ where: { email: email } });
+    if (!usuarioEncontrado) {
       return res.status(401).json({ msg: "Credenciais inválidas." });
     }
+    
+    console.log("Senha recebida:", senha);
+    console.log("Hash do banco:", usuarioEncontrado.senha);
 
-    const senhaValida = await bcrypt.compare(senha, usuario.senha);
+    //Valida senha
+    const senhaValida = bcrypt.compareSync(senha, usuarioEncontrado.senha);
     if (!senhaValida) {
       return res.status(401).json({ msg: "Credenciais inválidas." });
     }
 
-    const token = jwt.sign(
-      {
-        id_usuario: usuario.id_usuario,
-        role: usuario.tipo_usuario,
-        email: usuario.email,
-      },
-      JWT_SECRET,
-      {
-        expiresIn: "8h",
-      },
-    );
+    //Cria Token com função importada
+    await createUserToken(usuarioEncontrado, req, res)
 
-    return res.status(200).json({
-        msg: "Login realizado com sucesso!",
-        token,
-        usuario: {
-            id: usuario.usuario_id,
-            nome: usuario.nome,
-            email: usuario.email,
-            role: usuario.tipo_usuario
-        }
-    })
   } catch (error) {
     next(error)
   }
@@ -54,15 +42,14 @@ export const loginUsuario = async (req, res, next) => {
 
 export const usuarioLogado = async (req, res, next) => {
     try {
-        const usuario = await usuario.findByPk(req.usuario.id, {
-            attributes: {exclude: ["senha"]}
-        });
+        const token = await getToken(req)
+        const usuarioEncontrado = await getUserByToken(token)
 
-        if (!usuario) {
+        if (!usuarioEncontrado) {
             return res.status(404).json({msg: "Usuário não encontrado"})
         };
 
-        return res.status(200).json(usuario)
+        return res.status(200).json(usuarioEncontrado)
     } catch (error) {
         next(error);
     }

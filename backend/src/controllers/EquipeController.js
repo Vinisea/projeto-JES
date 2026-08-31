@@ -1,5 +1,5 @@
 import { atleta, equipe } from "../models/index.js"
-import { errorHandler } from "../middlewares/errorHandler.js";
+import { errorHandler } from "../utils/errorHandler.js";
 
 export const listarEquipes = async (req, res) => {
     const page = parseInt(req.query.page) || 1
