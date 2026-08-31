@@ -274,7 +274,10 @@ export const atualizarPlacar = async (req, res, next) => {
         const confrontoAchado = await confronto.findByPk(id);
         if (!confrontoAchado) return res.status(404).json({msg: "Confronto não encontrado"})
         //Não alterar confronto que não esteja em andamento
-        if (confrontoAchado.status_confronto !== "Em andamento") return res.status(400).json({msg: `Não pe possível alterar o placar de um confronto ${confrontoAchado.status}. O confronto precisa estar 'Em andamento`})
+        if (confrontoAchado.status_confronto !== "Em andamento") 
+            return res.status(400).json(
+        {msg: `Não pe possível alterar o placar de um confronto ${confrontoAchado.status_confronto}. O confronto precisa estar 'Em andamento`}
+    )
 
         if (placar_equipe_1 === undefined || placar_equipe_2 === undefined) {
             res.status(400).json({msg: "Informe os campos de 'placar_equipe_1' e 'placar_equipe_2'"})
@@ -293,37 +296,66 @@ export const atualizarPlacar = async (req, res, next) => {
 }
 
 
-//Finalizar confronto
-//PATCH confronto/:id/finalizar
+// Finalizar confronto
+// PATCH /confrontos/:id/finalizar
 export const finalizarConfronto = async (req, res, next) => {
     try {
         const { id } = req.params;
+
         const confrontoAchado = await confronto.findByPk(id);
 
-        if (!confrontoAchado) return res.status(404).json({msg: "Confronto não encontrado"})
-        //Não alterar confronto que não esteja em andamento
-        if (confrontoAchado.status_confronto !== "Em andamento") return res.status(400).json({msg: `Não pe possível alterar o placar de um confronto ${confrontoAchado.status}. O confronto precisa estar 'Em andamento`})
+        if (!confrontoAchado) {
+            return res.status(404).json({
+                msg: "Confronto não encontrado"
+            });
+        }
 
-        //Lógica para identificar a equipe vencedora
-        let id_vencedor = null;
-        if (confrontoAchado.placar_equipe_1 > confrontoAchado.placar_equipe_2) {
-            id_vencedor = confrontoAchado.id_equipe_1
-        } else if (confrontoAchado.placar_equipe_2 > confrontoAchado.placar_equipe_1) {
-            id_vencedor = confrontoAchado.id_equipe_2
+        // Só pode finalizar um confronto que esteja em andamento
+        if (confrontoAchado.status_confronto !== "Em andamento") {
+            return res.status(400).json({
+                msg: `O confronto precisa estar 'Em andamento' para ser finalizado. Status atual: ${confrontoAchado.status_confronto}.`
+            });
+        }
+
+        const {
+            placar_equipe_1,
+            placar_equipe_2
+        } = confrontoAchado;
+
+        // Determina o vencedor
+        let id_equipe_vencedora = null;
+
+        if (placar_equipe_1 > placar_equipe_2) {
+            id_equipe_vencedora = confrontoAchado.id_equipe_1;
+        } else if (placar_equipe_2 > placar_equipe_1) {
+            id_equipe_vencedora = confrontoAchado.id_equipe_2;
+        }
+
+        // Não permite empate definitivo nas fases eliminatórias
+        if (
+            placar_equipe_1 === placar_equipe_2 &&
+            ["Quartas", "Semifinal", "Final"].includes(confrontoAchado.fase)
+        ) {
+            return res.status(400).json({
+                msg: "Não é permitido empate nas fases eliminatórias. É necessário definir um vencedor através dos critérios de desempate."
+            });
         }
 
         await confrontoAchado.update({
             status_confronto: "Finalizado",
-            id_equipe_vencedora: id_vencedor
-        })
+            id_equipe_vencedora
+        });
 
         return res.status(200).json({
-            message: "Confronto encerrado com sucesso",
-            vencedor: id_vencedor ? `Equipe ID: ${id_vencedor}` : `Empate`,
+            message: "Confronto finalizado com sucesso.",
+            vencedor: id_equipe_vencedora
+                ? `Equipe ID: ${id_equipe_vencedora}`
+                : "Empate",
             confronto: confrontoAchado
-        })
+        });
+
     } catch (error) {
         next(error);
     }
-}
+};
 
