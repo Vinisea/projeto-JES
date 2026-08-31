@@ -38,6 +38,7 @@ export const loginUsuario = async (req, res, next) => {
 
     return res.status(200).json({
         msg: "Login realizado com sucesso!",
+        token,
         usuario: {
             id: usuario.usuario_id,
             nome: usuario.nome,
@@ -50,6 +51,30 @@ export const loginUsuario = async (req, res, next) => {
   }
 };
 
-export const logoutUsuario = async (req, res) => {};
 
-export const usuarioLogado = async (req, res) => {};
+export const usuarioLogado = async (req, res, next) => {
+    try {
+        const usuario = await usuario.findByPk(req.usuario.id, {
+            attributes: {exclude: ["senha"]}
+        });
+
+        if (!usuario) {
+            return res.status(404).json({msg: "Usuário não encontrado"})
+        };
+
+        return res.status(200).json(usuario)
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const logoutUsuario = async (req, res, next) => {
+    try {
+        //O logout acontece no clientSide quando remove o token
+        return res.status(200).json({
+            msg: "Logout realizado com sucesso!"
+        })
+    } catch (error) {
+        next(error);
+    }
+};
