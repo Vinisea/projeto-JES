@@ -2,8 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { usuario } from "../models/index.js";
 
-const JWT_SECRET =
-  process.env.JWT_SECRET || "Segredo_Mais_Segredo_Dos_Jogos_Internos"; //kkkkkkk
+const JWT_SECRET = process.env.JWT_SECRET || "Segredo_Mais_Segredo_Dos_Jogos_Internos"; //kkkkkkk
 
 export const loginUsuario = async (req, res, next) => {
   const { email, senha } = req.body;
