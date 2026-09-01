@@ -12,10 +12,12 @@ import rankingRoutes from "./ranking.routes.js";
 import dashboardRoutes from "./dashboard.routes.js";
 import regulamentoRoutes from "./regulamento.routes.js";
 import inscricaoRoutes from "./inscricao.routes.js";
+import publicRoutes from "./public.routes.js";
 
 const router = Router();
 
 router.use("/auth", authRoutes);
+router.use("/public", publicRoutes)
 router.use("/usuarios", usuarioRoutes);
 router.use("/turmas", turmaRoutes);
 router.use("/modalidades", modalidadeRoutes);
