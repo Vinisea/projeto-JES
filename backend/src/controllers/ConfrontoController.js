@@ -2,6 +2,7 @@ import { confronto } from "../models/Confronto.js";
 import { equipe } from "../models/Equipe.js";
 import { modalidade } from "../models/Modalidade.js";
 import { grupo } from "../models/Grupo.js";
+import { getIo } from "../config/socket.js";
 
 
 //Gerar partidas aleatórios
@@ -25,7 +26,6 @@ export const gerarPartidas = (equipes, dadosPartida) => {
 
     return confrontos;
 };
-
 
 // Listar todos os confrontos
 export const listarConfrontos = async (req, res, next) => {
@@ -198,7 +198,6 @@ export const removerConfronto = async (req, res, next) => {
     }
 };
 
-
 //Iniciar confronto
 export const iniciarConfronto = async (req, res, next) => {
     try {
@@ -237,13 +236,15 @@ export const atualizarPlacar = async (req, res, next) => {
         await confronto.update({
             placar_equipe_1: parseInt(placar_equipe_1),
             placar_equipe_2: parseInt(placar_equipe_2)
-        })
+        });
+
+
+
         return res.status(200).json({message: "Placar atualizado com sucesso!", confronto: confrontoAchado})
     } catch (error) {
         next(error);
     }
 }
-
 
 //Finalizar confronto
 //PATCH confronto/:id/finalizar
