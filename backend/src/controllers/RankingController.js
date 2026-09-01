@@ -1,5 +1,5 @@
 import { grupo, equipe, confronto, modalidade } from "../models/index.js";
-import { errorHandler } from "../middlewares/errorHandler.js";
+import { errorHandler } from "../utils/errorHandler.js";
 
 const REGRAS_PONTUACAO = {
   FUTSAL: {
