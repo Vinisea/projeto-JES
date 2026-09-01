@@ -4,10 +4,10 @@ import app from "./app.js";
 import { conn } from "./config/conn.js";
 import dotenv from "dotenv"
 import { initSocket } from "./config/socket.js";
-// import { criarAdminInicial } from "./seeds/seedAdmin.js"; <- para popular o banco com o usuario adm
+import { popularBancoInicial } from "./seeds/popularBanco.js";
 
 dotenv.config()
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3333;
 
 const server = http.createServer(app);
 
@@ -17,8 +17,8 @@ const iniciarServidor = async () => {
   try {
     // await conn.sync({ force: true });
     await conn.sync();
+    await popularBancoInicial();
 
-    // await criarAdminInicial(); <- para popular o banco com o usuario adm
     server.listen(PORT, () => {
       console.log(`Servidor rodando em: http://localhost:${PORT}`);
     });
