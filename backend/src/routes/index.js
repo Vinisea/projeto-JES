@@ -12,7 +12,7 @@ import rankingRoutes from "./ranking.routes.js";
 import dashboardRoutes from "./dashboard.routes.js";
 import regulamentoRoutes from "./regulamento.routes.js";
 import inscricaoRoutes from "./inscricao.routes.js";
-import publicRoutes from "./publicRoutes.js";
+import publicRoutes from "./public.routes.js";
 
 const router = Router();
 
