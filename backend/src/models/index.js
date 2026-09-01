@@ -4,7 +4,7 @@ import { atleta } from "./Atleta.js";
 import { confronto } from "./Confronto.js";
 import { usuario } from "./Usuario.js";
 import { inscricao } from "./Inscricao.js";
-
+import { grupo } from "./Grupo.js";
 
 // Relacionamento: Usuário -> Equipe (1:N)
 
@@ -59,7 +59,6 @@ inscricao.belongsTo(modalidade, {
 
 
 // Relacionamento: Equipe -> Confronto (1:N duplo)
-
 equipe.hasMany(confronto, {
     foreignKey: "id_equipe_1",
     as: "confrontos_como_mandante"
@@ -69,6 +68,8 @@ confronto.belongsTo(equipe, {
     foreignKey: "id_equipe_1",
     as: "equipe_mandante"
 });
+
+// ------------------------------------- //
 
 equipe.hasMany(confronto, {
     foreignKey: "id_equipe_2",
@@ -80,6 +81,55 @@ confronto.belongsTo(equipe, {
     as: "equipe_visitante"
 });
 
+// ------------------------------------- //
+
+modalidade.hasMany(grupo, {
+    foreignKey: "id_modalidade",
+    as: "grupos"
+});
+
+grupo.belongsTo(modalidade, {
+    foreignKey: "id_modalidade",
+    as: "modalidade"
+});
+
+// ------------------------------------- //
+
+grupo.hasMany(equipe, {
+    foreignKey: "id_grupo",
+    as: "equipes"
+});
+
+equipe.belongsTo(grupo, {
+    foreignKey: "id_grupo",
+    as: "grupo"
+});
+
+// ------------------------------------- //
+
+modalidade.hasMany(confronto, {
+    foreignKey: "id_modalidade",
+    as: "confrontos"
+});
+
+confronto.belongsTo(modalidade, {
+    foreignKey: "id_modalidade",
+    as: "modalidade"
+});
+
+// ------------------------------------- //
+
+grupo.hasMany(confronto, {
+    foreignKey: "id_grupo",
+    as: "confrontos"
+});
+
+confronto.belongsTo(grupo, {
+    foreignKey: "id_grupo",
+    as: "grupo"
+});
+
+
 
 export {
     usuario,
@@ -87,5 +137,6 @@ export {
     atleta,
     modalidade,
     confronto,
-    inscricao
+    inscricao,
+    grupo
 };

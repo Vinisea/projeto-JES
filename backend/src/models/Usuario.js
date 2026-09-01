@@ -41,13 +41,26 @@ export const usuario = conn.define(
         validate: {
             isIn: {
                 args: [['Administrador', 'Arbitro', 'Docente']],
-                msg: "Tipode usuário inválido"
+                msg: "Tipo de usuário inválido"
             }
         }        
     },
   },
   {
     tableName: "usuario",
+    
     timestamps: false,
+
+    defaultScope: {
+      attributes: {
+        exclude: ["senha"]
+      }
+    },
+
+    scopes: {
+      comSenha: {
+        attributes: {}
+      }
+    }
   },
 );
