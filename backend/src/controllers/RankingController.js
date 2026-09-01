@@ -1,11 +1,50 @@
 import { grupo, equipe, confronto, modalidade } from "../models/index.js";
 import { errorHandler } from "../middlewares/errorHandler.js";
 
+const REGRAS_PONTUACAO = {
+  FUTSAL: {
+    pontosVitoria: 3,
+    pontosDerrota: 0,
+    usaSaldo: true,
+    permiteEmpate: false,
+  },
+
+  QUEIMADO: {
+    pontosVitoria: null,
+    pontosDerrota: null,
+    usaSaldo: false,
+    permiteEmpate: false,
+  },
+
+  VOLEIBOL: {
+    pontosVitoria: null,
+    pontosDerrota: null,
+    usaSaldo: false,
+    permiteEmpate: false,
+  },
+
+  FUTMESA: {
+    pontosVitoria: null,
+    pontosDerrota: null,
+    usaSaldo: false,
+    permiteEmpate: false,
+  },
+
+  DAMA: {
+    pontosVitoria: null,
+    pontosDerrota: null,
+    usaSaldo: false,
+    permiteEmpate: true,
+  },
+};
+
 // ==========================================
 // FUNÇÕES AUXILIARES DE CÁLCULO
 // ==========================================
 
-const calcularEstatisticasEquipes = (equipes, confrontos) => {
+const calcularEstatisticasEquipes = (equipes, confrontos, nomeModalidade) => {
+  const regras = REGRAS_PONTUACAO[nomeModalidade];
+
   const tabelaMap = {};
 
   // Inicializa zerado para todas as equipes do grupo
@@ -20,7 +59,7 @@ const calcularEstatisticasEquipes = (equipes, confrontos) => {
       pontos: 0,
       gols_marcados: 0,
       gols_sofridos: 0,
-      saldo: 0
+      saldo: 0,
     };
   });
 
@@ -47,21 +86,23 @@ const calcularEstatisticasEquipes = (equipes, confrontos) => {
 
       if (p1 > p2) {
         eq1.vitorias += 1;
-        eq1.pontos += 3;
+        eq1.pontos += regras.pontosVitoria;
         eq2.derrotas += 1;
+        eq2.pontos += regras.pontosDerrota;
       } else if (p2 > p1) {
         eq2.vitorias += 1;
-        eq2.pontos += 3;
+        eq2.pontos += regras.pontosVitoria;
         eq1.derrotas += 1;
+        eq1.pontos += regras.pontosDerrota;
       } else {
         eq1.empates += 1;
-        eq1.pontos += 1;
         eq2.empates += 1;
-        eq2.pontos += 1;
       }
 
-      eq1.saldo = eq1.gols_marcados - eq1.gols_sofridos;
-      eq2.saldo = eq2.gols_marcados - eq2.gols_sofridos;
+      if (regras.usaSaldo) {
+        eq1.saldo = eq1.gols_marcados - eq1.gols_sofridos;
+        eq2.saldo = eq2.gols_marcados - eq2.gols_sofridos;
+      }
     }
   });
 
@@ -73,16 +114,16 @@ const classificarEquipes = (tabelaArray) => {
     if (b.pontos !== a.pontos) return b.pontos - a.pontos;
     if (b.vitorias !== a.vitorias) return b.vitorias - a.vitorias;
     if (b.saldo !== a.saldo) return b.saldo - a.saldo;
-    if (b.gols_marcados !== a.gols_marcados) return b.gols_marcados - a.gols_marcados;
+    if (b.gols_marcados !== a.gols_marcados)
+      return b.gols_marcados - a.gols_marcados;
     return a.nome_equipe.localeCompare(b.nome_equipe);
   });
 
   return ordenada.map((eq, index) => ({
     posicao: `${index + 1}º`,
-    ...eq
+    ...eq,
   }));
 };
-
 
 // ==========================================
 // METODOS DO CONTROLLER
@@ -93,7 +134,7 @@ export const listarRankingPorGrupo = async (req, res) => {
 
   try {
     const grupoEncontrado = await grupo.findByPk(grupoId, {
-      include: [{ model: equipe, as: "equipes" }]
+      include: [{ model: equipe, as: "equipes" }],
     });
 
     if (!grupoEncontrado) {
@@ -103,17 +144,26 @@ export const listarRankingPorGrupo = async (req, res) => {
     const confrontos = await confronto.findAll({
       where: {
         id_grupo: grupoId,
-        status_confronto: "Finalizado"
-      }
+        status_confronto: "Finalizado",
+      },
     });
 
-    const estatisticas = calcularEstatisticasEquipes(grupoEncontrado.equipes, confrontos);
+    const modalidadeEncontrada = await modalidade.findByPk(
+      grupoEncontrado.id_modalidade,
+    );
+
+    const estatisticas = calcularEstatisticasEquipes(
+      grupoEncontrado.equipes,
+      confrontos,
+      modalidadeEncontrada.nome_modalidade.toUpperCase(),
+    );
+
     const rankingFinal = classificarEquipes(estatisticas);
 
     return res.status(200).json({
       grupo: grupoEncontrado.nome_grupo,
       id_modalidade: grupoEncontrado.id_modalidade,
-      ranking: rankingFinal
+      ranking: rankingFinal,
     });
   } catch (error) {
     errorHandler(error, res);
@@ -129,9 +179,9 @@ export const listarRankingPorModalidade = async (req, res) => {
         {
           model: grupo,
           as: "grupos",
-          include: [{ model: equipe, as: "equipes" }]
-        }
-      ]
+          include: [{ model: equipe, as: "equipes" }],
+        },
+      ],
     });
 
     if (!modalidadeEncontrada) {
@@ -144,39 +194,41 @@ export const listarRankingPorModalidade = async (req, res) => {
       const confrontos = await confronto.findAll({
         where: {
           id_grupo: g.id_grupo,
-          status_confronto: "Finalizado"
-        }
+          status_confronto: "Finalizado",
+        },
       });
 
-      const estatisticas = calcularEstatisticasEquipes(g.equipes, confrontos);
+      const estatisticas = calcularEstatisticasEquipes(
+        g.equipes,
+        confrontos,
+        modalidadeEncontrada.nome_modalidade.toUpperCase(),
+      );
+
       const rankingFinal = classificarEquipes(estatisticas);
 
       resultadoPorGrupo.push({
         id_grupo: g.id_grupo,
         nome_grupo: g.nome_grupo,
-        ranking: rankingFinal
+        ranking: rankingFinal,
       });
     }
 
     return res.status(200).json({
       modalidade: modalidadeEncontrada.nome_modalidade,
       categoria: modalidadeEncontrada.categoria,
-      grupos: resultadoPorGrupo
+      grupos: resultadoPorGrupo,
     });
   } catch (error) {
     errorHandler(error, res);
   }
 };
 
-
 // Tabela de pontuação geral por posição na modalidade
 const TABELA_PONTOS_GERAL = {
-  1: 10, // 1º lugar ganha 10 pontos gerais
-  2: 7,  // 2º lugar ganha 7 pontos gerais
-  3: 5,  // 3º lugar ganha 5 pontos gerais
-  4: 3,  // 4º lugar ganha 3 pontos gerais
+  1: 100,
+  2: 70,
+  3: 50,
 };
-const PONTOS_PARTICIPACAO = 1; // 5º lugar em diante
 
 export const listarRankingGeral = async (req, res) => {
   try {
@@ -186,9 +238,9 @@ export const listarRankingGeral = async (req, res) => {
         {
           model: grupo,
           as: "grupos",
-          include: [{ model: equipe, as: "equipes" }]
-        }
-      ]
+          include: [{ model: equipe, as: "equipes" }],
+        },
+      ],
     });
 
     // Mapa para acumular a pontuação geral de cada equipe/turma
@@ -202,21 +254,26 @@ export const listarRankingGeral = async (req, res) => {
         const confrontos = await confronto.findAll({
           where: {
             id_grupo: g.id_grupo,
-            status_confronto: "Finalizado"
-          }
+            status_confronto: "Finalizado",
+          },
         });
 
         // Se não houver jogos finalizados, pula
         if (confrontos.length === 0) continue;
 
         // Calcula e classifica as equipes deste grupo especificamente
-        const estatisticas = calcularEstatisticasEquipes(g.equipes, confrontos);
+        const estatisticas = calcularEstatisticasEquipes(
+          g.equipes,
+          confrontos,
+          mod.nome_modalidade.toUpperCase(),
+        );
         const classificacaoGrupo = classificarEquipes(estatisticas);
 
         // 3. Atribui a pontuação geral baseada na colocação do grupo
         classificacaoGrupo.forEach((item, index) => {
           const pos = index + 1; // 1, 2, 3, 4...
-          const pontosGeraisGanhos = TABELA_PONTOS_GERAL[pos] || PONTOS_PARTICIPACAO;
+
+          const pontosGeraisGanhos = TABELA_PONTOS_GERAL[pos] || 0;
 
           const nomeEquipe = item.nome_equipe;
 
@@ -227,7 +284,7 @@ export const listarRankingGeral = async (req, res) => {
               primeiros_lugares: 0,
               segundos_lugares: 0,
               terceiros_lugares: 0,
-              modalidades_disputadas: 0
+              modalidades_disputadas: 0,
             };
           }
 
@@ -243,33 +300,46 @@ export const listarRankingGeral = async (req, res) => {
 
     // 4. Converte o mapa para Array e Ordena o Ranking Geral
     const rankingGeralArray = Object.values(rankingGeralMap).sort((a, b) => {
+
       // 1º Criterio: Pontos Gerais
-      if (b.pontos_gerais !== a.pontos_gerais) return b.pontos_gerais - a.pontos_gerais;
+      if (b.pontos_gerais !== a.pontos_gerais)
+        return b.pontos_gerais - a.pontos_gerais;
+
       // 2º Criterio: Quantidade de 1ºs lugares (Ouros)
-      if (b.primeiros_lugares !== a.primeiros_lugares) return b.primeiros_lugares - a.primeiros_lugares;
+      if (b.primeiros_lugares !== a.primeiros_lugares)
+        return b.primeiros_lugares - a.primeiros_lugares;
+
       // 3º Criterio: Quantidade de 2ºs lugares (Pratas)
-      if (b.segundos_lugares !== a.segundos_lugares) return b.segundos_lugares - a.segundos_lugares;
-      // 4º Criterio: Nome
+      if (b.segundos_lugares !== a.segundos_lugares)
+        return b.segundos_lugares - a.segundos_lugares;
+
+      // 4º Criterio: Quantidade de 3ºs lugares (bronzes)
+      if (b.terceiros_lugares !== a.terceiros_lugares)
+        return b.terceiros_lugares - a.terceiros_lugares;
+
+      // 5º Criterio: Nome
       return a.equipe.localeCompare(b.equipe);
+
     });
 
     // 5. Adiciona o rótulo de posição geral (1º, 2º, 3º...)
     const resultadoComPosicao = rankingGeralArray.map((item, index) => ({
       posicao: `${index + 1}º`,
-      ...item
+      ...item,
     }));
 
     return res.status(200).json({
       titulo: "Ranking Geral do Campeonato",
-      ranking: resultadoComPosicao
+      ranking: resultadoComPosicao,
     });
   } catch (error) {
     errorHandler(error, res);
   }
 };
 
-
 export const listarRankingPorTurma = async (req, res) => {
   // Caso tenham pontuação por turma geral do colégio
-  return res.status(501).json({ msg: "Ranking por turma ainda não implementado." });
+  return res
+    .status(501)
+    .json({ msg: "Ranking por turma ainda não implementado." });
 };

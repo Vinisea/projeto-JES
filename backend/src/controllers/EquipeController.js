@@ -8,7 +8,7 @@ export const listarEquipes = async (req, res) => {
 
     try {
         const equipeLista = await equipe.findAndCountAll({
-            include: { model: atleta },
+            include: { model: atleta, as: "atletas"},
             distinct: true,
             offset,
             limit
@@ -29,7 +29,7 @@ export const buscarEquipePorId = async (req, res) => {
 
     try {
         const equipeFiltrada = await equipe.findByPk(id, {
-            include: { model: atleta }
+            include: { model: atleta, as: "atletas"}
         })
 
         if (!equipeFiltrada) return res.status(404).json({msg: "Equipe não encontrada"})
