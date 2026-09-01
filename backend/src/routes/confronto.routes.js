@@ -11,25 +11,25 @@ import {
     iniciarConfronto,
     gerarConfrontosDoGrupo
 } from "../controllers/ConfrontoController.js";
+import { verifyToken } from "../middlewares/verifyToken.js";
 
 const router = Router();
 
 router.get("/", listarConfrontos);
-
-router.post("/gerar", gerarConfrontosDoGrupo);
-
 router.get("/:id", buscarConfrontoPorId);
 
-router.post("/", criarConfronto);
+router.post("/gerar", verifyToken, gerarConfrontosDoGrupo);
 
-router.put("/:id", editarConfronto);
+router.post("/", verifyToken, criarConfronto);
 
-router.delete("/:id", removerConfronto);
+router.put("/:id", verifyToken, editarConfronto);
 
-router.patch("/:id/iniciar", iniciarConfronto);
+router.delete("/:id", verifyToken, removerConfronto);
 
-router.patch("/:id/finalizar", finalizarConfronto);
+router.patch("/:id/iniciar", verifyToken, iniciarConfronto);
 
-router.patch("/:id/placar", atualizarPlacar);
+router.patch("/:id/finalizar", verifyToken, finalizarConfronto);
+
+router.patch("/:id/placar", verifyToken, atualizarPlacar);
 
 export default router;

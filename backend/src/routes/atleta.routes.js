@@ -8,6 +8,7 @@ import {
     removerAtleta,
     transferirEquipe
 } from "../controllers/AtletaController.js";
+import { verifyToken } from "../middlewares/verifyToken.js";
 
 
 const router = Router();
@@ -15,11 +16,11 @@ const router = Router();
 
 router.get("/", listarAtletas);
 router.get("/:id", buscarAtletaPorId);
-router.post("/", criarAtleta);
-router.put("/:id", editarAtleta);
-router.delete("/:id", removerAtleta);
 
-router.patch("/:id/equipe", transferirEquipe);
+router.post("/", verifyToken, criarAtleta);
+router.put("/:id", verifyToken, editarAtleta);
+router.delete("/:id", verifyToken, removerAtleta);
+router.patch("/:id/equipe", verifyToken, transferirEquipe);
 
 
 export default router;

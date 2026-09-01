@@ -11,19 +11,22 @@ import {
   removerEquipeDoGrupo,
   sortearGrupos,
 } from "../controllers/GrupoController.js";
+import { verifyToken } from "../middlewares/verifyToken.js";
 
 const router = Router();
 
-router.post("/sortear", sortearGrupos);
+router.post("/sortear", verifyToken, sortearGrupos);
 
-router.post("/", criarGrupo);
 router.get("/", listarGrupos);
 router.get("/:id", buscarGrupoPorId);
-router.put("/:id", editarGrupo);
-router.delete("/:id", removerGrupo);
+
+router.post("/", verifyToken, criarGrupo);
+router.put("/:id", verifyToken, editarGrupo);
+router.delete("/:id", verifyToken, removerGrupo);
 
 router.get("/:id/equipes", listarEquipesDoGrupo);
-router.post("/:id/equipes", adicionarEquipeAoGrupo);
-router.delete("/:id/equipes/:equipeId", removerEquipeDoGrupo);
+
+router.post("/:id/equipes", verifyToken, adicionarEquipeAoGrupo);
+router.delete("/:id/equipes/:equipeId", verifyToken, removerEquipeDoGrupo);
 
 export default router;
