@@ -7,7 +7,7 @@ export const createUserToken = async (usuario, request, response) => {
     try {
         const token = jwt.sign(
             {
-                id: usuario.id,
+                id: usuario.id_usuario,
                 email: usuario.email,
                 idade: usuario.idade,
             },
@@ -22,7 +22,7 @@ export const createUserToken = async (usuario, request, response) => {
             statusCode: 200,
             message: "Você está autenticado",
             token: token,
-            usuarioId: usuario.id
+            usuarioId: usuario.id_usuario
         })
     } catch (error) {
         await errorHandler(error, response)

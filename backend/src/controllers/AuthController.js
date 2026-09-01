@@ -43,7 +43,7 @@ export const loginUsuario = async (req, res, next) => {
 
 export const usuarioLogado = async (req, res, next) => {
     try {
-        const token = await getToken(req)
+        const token = getToken(req)
         const usuarioEncontrado = await getUserByToken(token)
 
         if (!usuarioEncontrado) {

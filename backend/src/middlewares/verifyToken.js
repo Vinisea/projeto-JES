@@ -32,7 +32,7 @@ export const verifyToken = async (req, res, next) => {
       }
       return response.status(401).json({ message });
     }
-    request.usuario = verified;
+    req.usuario = verified;
     next();
   } catch (error) {}
 };
