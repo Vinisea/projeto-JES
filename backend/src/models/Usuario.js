@@ -48,6 +48,19 @@ export const usuario = conn.define(
   },
   {
     tableName: "usuario",
+    
     timestamps: false,
+
+    defaultScope: {
+      attributes: {
+        exclude: ["senha"]
+      }
+    },
+
+    scopes: {
+      comSenha: {
+        attributes: {}
+      }
+    }
   },
 );
