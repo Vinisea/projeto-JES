@@ -22,6 +22,7 @@ export const loginUsuario = async (req, res, next) => {
       return res.status(401).json({ msg: "Credenciais inválidas." });
     }
     
+    //checar se está vindo tudo certo
     console.log("Senha recebida:", senha);
     console.log("Hash do banco:", usuarioEncontrado.senha);
 
