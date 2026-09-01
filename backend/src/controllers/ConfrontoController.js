@@ -238,7 +238,13 @@ export const atualizarPlacar = async (req, res, next) => {
             placar_equipe_2: parseInt(placar_equipe_2)
         });
 
-
+        //Emite o evento "partida:atualizada" apenas para quem está na sala
+        getIo().to(`partida:${id}`).emit("partida:atualizada", {
+            id_confronto: confrontoAchado.id_consfronto,
+            placar_equipe_1: confrontoAchado.placar_equipe_1,
+            placar_equipe_2: confrontoAchado.placar_equipe_2,
+            status_confronto: confrontoAchado.status_confronto
+        })
 
         return res.status(200).json({message: "Placar atualizado com sucesso!", confronto: confrontoAchado})
     } catch (error) {
