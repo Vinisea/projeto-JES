@@ -1,8 +1,7 @@
-export const Footer = () => {
-    return(
-        <footer>
-            <p>Desenvolvido por Equipe 0312</p>
-            <p>© copyright 2026 - 2093</p>
-        </footer>
-    );
-} 
+export function Footer() {
+  return (
+    <footer className="footer">
+      <p>JES 2026 • Jogos Internos SESI — Tema: Campeões da Copa do Mundo</p>
+    </footer>
+  );
+}
