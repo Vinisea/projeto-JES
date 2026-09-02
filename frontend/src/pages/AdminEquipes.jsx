@@ -6,9 +6,9 @@ export default function AdminEquipes() {
       description="Organize as equipes e turmas participantes."
       button="+ Nova equipe"
       rows={[
-        ["9º B", "Espanha • 150 pts"],
-        ["9º A", "Inglaterra • 100 pts"],
-        ["2º EM A", "Argentina • 70 pts"],
+        ["3º B", "Espanha • 150 pts"],
+        ["3º A", "Espanha • 100 pts"],
+        ["3º C", "Espanha • 70 pts"],
       ]}
     />
   );
