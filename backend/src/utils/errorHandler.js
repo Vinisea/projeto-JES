@@ -1,4 +1,4 @@
-export const errorHandler = (err, res) => {
+export const errorHandler = (err, req, res, next) => {
     console.error(err);
 
     if (err.name === "SequelizeValidationError") {

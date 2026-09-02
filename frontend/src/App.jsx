@@ -12,6 +12,9 @@ import AdminAtletas from "./pages/AdminAtletas.jsx";
 import AdminEquipes from "./pages/AdminEquipes.jsx";
 import AdminPartidas from "./pages/AdminPartidas.jsx";
 import AdminRegulamento from "./pages/AdminRegulamento.jsx";
+import Grupos from "./pages/Grupos.jsx";
+import Partidas from "./pages/Partidas.jsx";
+import DashboardCompeticao from "./pages/DashboardCompeticao.jsx";
 
 function NotFound() {
   return (
@@ -35,6 +38,9 @@ export default function App() {
         <Route path="/modalidades" element={<Modalidades />} />
         <Route path="/ao-vivo" element={<JogosAoVivo />} />
         <Route path="/Ranking" element={<Ranking />} />
+        <Route path="/grupos" element={<Grupos />} />
+        <Route path="/partidas" element={<Partidas />} />
+        <Route path="/dashboard/competicao" element={<DashboardCompeticao />} />
         <Route path="/login" element={<Login />} />
 
         <Route element={<PrivateRoute />}>

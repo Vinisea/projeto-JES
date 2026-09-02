@@ -4,7 +4,7 @@ import { confronto, modalidade, equipe } from "../models/index.js"; // ajuste os
 // GET /partidas?status=EM_ANDAMENTO&modalidade=1&grupo=A&data=2026-09-01
 export const listarPartidasPublicas = async (req, res, next) => {
   try {
-    const { status, modalidade: idModalidade, grupo, data } = req.query;
+    const { status, data } = req.query;
 
     // 1. Filtros dinâmicos para a partida
     const wherePartida = {};
@@ -21,24 +21,10 @@ export const listarPartidasPublicas = async (req, res, next) => {
       };
     }
 
-    // 2. Filtros e otimização dos relacionamentos (Dia 4: Sem dados sensíveis/internos)
-    const includeModalidade = {
-      model: modalidade,
-      attributes: ["id_modalidade", "nome", "genero"],
-      ...(idModalidade && { where: { id_modalidade: idModalidade } })
-    };
-
-    const includeEquipes = {
-      model: equipe,
-      attributes: ["id_equipe", "nome", "turma", "grupo"],
-      ...(grupo && { where: { grupo } })
-    };
-
-    // 3. Busca otimizada no banco
+    // Consulta apenas as colunas existentes no schema atual do banco.
     const partidas = await confronto.findAll({
       where: wherePartida,
-      attributes: { exclude: ["createdAt", "updatedAt"] }, // Otimização de payload
-      include: [includeModalidade, includeEquipes],
+      attributes: ["id_confronto", "data_hora", "local_partida", "placar_equipe_1", "placar_equipe_2", "fase", "status_confronto", "id_equipe_1", "id_equipe_2"],
       order: [["data_hora", "ASC"]]
     });
 
@@ -54,11 +40,7 @@ export const obterPartidaPublica = async (req, res, next) => {
     const { id } = req.params;
 
     const partida = await confronto.findByPk(id, {
-      attributes: { exclude: ["createdAt", "updatedAt"] },
-      include: [
-        { model: modalidade, attributes: ["id_modalidade", "nome", "genero"] },
-        { model: equipe, attributes: ["id_equipe", "nome", "turma", "grupo"] }
-      ]
+      attributes: ["id_confronto", "data_hora", "local_partida", "placar_equipe_1", "placar_equipe_2", "fase", "status_confronto", "id_equipe_1", "id_equipe_2"]
     });
 
     if (!partida) {

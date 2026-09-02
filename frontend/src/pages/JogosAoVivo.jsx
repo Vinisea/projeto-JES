@@ -1,40 +1,50 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import api from "../services/api.js";
 
-const jogos = [
-  {
-    time: "09:00",
-    sport: "Voleibol Masculino",
-    court: "Quadra 1",
-    home: "2º B",
-    away: "1º A",
-    status: "Ao vivo",
-    homeScore: 2,
-    awayScore: 1,
-  },
-  {
-    time: "10:30",
-    sport: "Fut7 Masculino",
-    court: "Campo 1",
-    home: "2º  A",
-    away: "3º  B",
-    status: "Próximo",
-    homeScore: null,
-    awayScore: null,
-  },
-  {
-    time: "13:30",
-    sport: "Queimado Feminino",
-    court: "Quadra 2",
-    home: "1º A",
-    away: "1º B",
-    status: "Próximo",
-    homeScore: null,
-    awayScore: null,
-  },
-];
+function normalizarJogo(item) {
+  const status = item.status_confronto || item.status || "Agendado";
+  const aoVivo = status.toLowerCase().includes("andamento");
+
+  return {
+    id: item.id_confronto || item.id,
+    time: item.data_hora?.slice?.(11, 16) || "--:--",
+    sport: item.modalidade?.nome_modalidade || item.nome_modalidade || "Modalidade",
+    court: item.local_partida || item.local || "Local a definir",
+    home: item.equipe_mandante?.nome_equipe || item.equipeA || "Equipe A",
+    away: item.equipe_visitante?.nome_equipe || item.equipeB || "Equipe B",
+    status: aoVivo ? "Ao vivo" : "Próximo",
+    homeScore: item.placar_equipe_1 ?? null,
+    awayScore: item.placar_equipe_2 ?? null,
+  };
+}
+
+function extrairJogos(resposta) {
+  const dados = resposta?.data ?? resposta;
+  if (Array.isArray(dados)) return dados;
+  return dados?.partidas || dados?.confrontos || dados?.data || [];
+}
 
 export default function JogosAoVivo() {
   const [tab, setTab] = useState("Ao vivo");
+  const [jogos, setJogos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    async function carregarJogos() {
+      try {
+        const resposta = await api.get("/public/partidas");
+        setJogos(extrairJogos(resposta).map(normalizarJogo));
+      } catch (error) {
+        console.error("Não foi possível carregar os jogos ao vivo.", error);
+        setJogos([]);
+      } finally {
+        setCarregando(false);
+      }
+    }
+
+    carregarJogos();
+  }, []);
+
   const visibleGames = jogos.filter((game) =>
     tab === "Ao vivo" ? game.status === "Ao vivo" : game.status === "Próximo",
   );
@@ -64,7 +74,7 @@ export default function JogosAoVivo() {
       </div>
 
       <section className="games-list">
-        {visibleGames.map((game) => (
+        {carregando ? <div className="empty-state">Carregando jogos...</div> : visibleGames.map((game) => (
           <article className="game-card" key={`${game.time}-${game.sport}`}>
             <div className="game-meta">
               <span
