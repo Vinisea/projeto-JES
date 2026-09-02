@@ -1,6 +1,4 @@
 import AdminLayout from "../components/AdminLayout.jsx";
-import { useEffect, useState } from "react";
-import { buscarResumoDashboard } from "../services/dashboardService.js";
 
 const stats = [
   { label: "Modalidades", value: "8", detail: "Cadastradas", color: "orange" },
