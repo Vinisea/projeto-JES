@@ -6,7 +6,7 @@ export default function AdminAtletas() {
       description="Gerencie os estudantes inscritos nos jogos."
       button="+ Novo atleta"
       rows={[
-        ["Ana Souza", "9º A • Voleibol"],
+        ["Vinicius Fernandes", "3º D • Voleibol"],
         ["Pedro Lima", "9º B • Fut7"],
         ["Mariana Costa", "2º EM A • Queimado"],
       ]}

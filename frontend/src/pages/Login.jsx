@@ -1,13 +1,17 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext.jsx";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
-  function entrar(event) {
+  async function entrar(event) {
     event.preventDefault();
     setErro("");
 
@@ -16,7 +20,17 @@ export default function Login() {
       return;
     }
 
-    navigate("/admin");
+    try {
+      setCarregando(true);
+      await login(email, senha);
+      const destino = location.state?.from || "/admin";
+      navigate(destino, { replace: true });
+    } catch (error) {
+      console.error("Erro no login:", error);
+      setErro("Não foi possível entrar. Confira o backend e seus dados.");
+    } finally {
+      setCarregando(false);
+    }
   }
 
   return (
@@ -36,11 +50,11 @@ export default function Login() {
         </p>
 
         <form onSubmit={entrar} className="login-form">
-          <label htmlFor="email">E-mail</label>
+          <label htmlFor="email">Usuario</label>
           <input
             id="email"
             type="email"
-            placeholder="seu@email.com"
+            placeholder="Usuario"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
@@ -53,13 +67,13 @@ export default function Login() {
             onChange={(event) => setSenha(event.target.value)}
           />
           {erro && <div className="form-error">{erro}</div>}
-          <button className="login-button" type="submit">
-            Entrar no painel
+          <button className="login-button" type="submit" disabled={carregando}>
+            {carregando ? "Entrando..." : "Entrar no painel"}
           </button>
         </form>
 
         <Link className="back-link" to="/">
-          ← Voltar para o site público
+          ← Voltar ao Inicio
         </Link>
       </section>
     </main>
