@@ -343,3 +343,89 @@ export const listarRankingPorTurma = async (req, res) => {
     .status(501)
     .json({ msg: "Ranking por turma ainda não implementado." });
 };
+
+export const listarPontuacaoEquipe = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const equipeEncontrada = await equipe.findByPk(id);
+
+    if (!equipeEncontrada) {
+      return res.status(404).json({
+        msg: "Equipe não encontrada.",
+      });
+    }
+
+    let pontuacaoTotal = 0;
+    const modalidades = [];
+
+    // Busca todas as modalidades do campeonato
+    const modalidadesEncontradas = await modalidade.findAll({
+      include: [
+        {
+          model: grupo,
+          as: "grupos",
+          include: [{ model: equipe, as: "equipes" }],
+        },
+      ],
+    });
+
+    for (const mod of modalidadesEncontradas) {
+      for (const g of mod.grupos) {
+        // Verifica se a equipe participa deste grupo
+        const equipeDoGrupo = g.equipes.find(
+          (eq) => eq.id_equipe === Number(id),
+        );
+
+        if (!equipeDoGrupo) continue;
+
+        // Busca apenas confrontos finalizados
+        const confrontos = await confronto.findAll({
+          where: {
+            id_grupo: g.id_grupo,
+            status_confronto: "Finalizado",
+          },
+        });
+
+        if (confrontos.length === 0) continue;
+
+        const estatisticas = calcularEstatisticasEquipes(
+          g.equipes,
+          confrontos,
+          mod.nome_modalidade.toUpperCase(),
+        );
+
+        const classificacao = classificarEquipes(estatisticas);
+
+        const equipeClassificada = classificacao.find(
+          (eq) => eq.id_equipe === Number(id),
+        );
+
+        if (!equipeClassificada) continue;
+
+        const posicao = classificacao.findIndex(
+          (eq) => eq.id_equipe === Number(id),
+        ) + 1;
+
+        const pontos = TABELA_PONTOS_GERAL[posicao] || 0;
+
+        pontuacaoTotal += pontos;
+
+        modalidades.push({
+          modalidade: mod.nome_modalidade,
+          grupo: g.nome_grupo,
+          posicao: `${posicao}º`,
+          pontos,
+        });
+      }
+    }
+
+    return res.status(200).json({
+      equipe: equipeEncontrada.nome_equipe,
+      pontuacao_total: pontuacaoTotal,
+      modalidades,
+    });
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};

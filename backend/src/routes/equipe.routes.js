@@ -10,13 +10,16 @@ import {
     removerAtleta,
     listarAtletas
 } from "../controllers/EquipeController.js";
+
+import { listarPontuacaoEquipe } from "../controllers/RankingController.js";
+
 import { verifyToken } from "../middlewares/verifyToken.js";
 
 
 const router = Router();
 
-
 router.get("/", listarEquipes);
+router.get("/:id/pontuacao", listarPontuacaoEquipe);
 router.get("/:id", buscarEquipePorId);
 
 router.post("/", verifyToken, criarEquipe);
