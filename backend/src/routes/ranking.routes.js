@@ -11,6 +11,6 @@ const router = Router();
 router.get("/geral", listarRankingGeral);
 router.get("/grupo/:grupoId", listarRankingPorGrupo);
 router.get("/modalidade/:modalidadeId", listarRankingPorModalidade);
-router.get("/turma/turma:id", listarRankingPorTurma);
+router.get("/turma/:turmaId", listarRankingPorTurma);
 
 export default router;

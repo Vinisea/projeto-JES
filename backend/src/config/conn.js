@@ -2,9 +2,11 @@ import Sequelize from "sequelize";
 import dotenv from "dotenv";
 dotenv.config()
 
-export const conn = new Sequelize(process.env.DATABASE_URL, {
+const databaseUrl = process.env.DATABASE_URL || "postgres://localhost:5432/projeto_jes";
+
+export const conn = new Sequelize(databaseUrl, {
     dialect: "postgres",
-    dialectOpitions: {
+    dialectOptions: {
         ssl: {
             require: true,
             rejectUnauthorized: false
@@ -13,7 +15,7 @@ export const conn = new Sequelize(process.env.DATABASE_URL, {
     logging: false
 })
 
-async function testarConexao() {
+export async function testarConexao() {
   try {
     await conn.authenticate();
     console.log('Conexão com o Supabase via Sequelize estabelecida com sucesso!');
@@ -21,5 +23,3 @@ async function testarConexao() {
     console.error('Não foi possível conectar ao banco de dados:', error);
   }
 }
-
-testarConexao();

@@ -15,7 +15,7 @@ initSocket(server);
 
 const iniciarServidor = async () => {
   try {
-    // await conn.sync({ force: true });
+    await conn.authenticate();
     await conn.sync();
     await popularBancoInicial();
 

@@ -9,7 +9,7 @@ export const createUserToken = async (usuario, request, response) => {
             {
                 id: usuario.id_usuario,
                 email: usuario.email,
-                idade: usuario.idade,
+                tipo_usuario: usuario.tipo_usuario,
             },
             JWT_SECRET,
             {
