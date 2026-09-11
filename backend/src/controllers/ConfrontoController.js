@@ -308,11 +308,13 @@ export const atualizarPlacar = async (req, res, next) => {
     }
 }
 
-//Finalizar confronto
-//PATCH confronto/:id/finalizar
+// Finalizar confronto
+// PATCH /confrontos/:id/finalizar
+
 export const finalizarConfronto = async (req, res, next) => {
     try {
         const { id } = req.params;
+
         const confrontoAchado = await confronto.findByPk(id);
 
         if (!confrontoAchado) return res.status(404).json({msg: "Confronto não encontrado"})
@@ -325,19 +327,36 @@ export const finalizarConfronto = async (req, res, next) => {
             id_vencedor = confrontoAchado.id_equipe_1
         } else if (confrontoAchado.placar_equipe_2 > confrontoAchado.placar_equipe_1) {
             id_vencedor = confrontoAchado.id_equipe_2
+        if (!confrontoAchado) {
+            return res.status(404).json({
+                msg: "Confronto não encontrado"
+            });
+        }
+
+        // Não permite empate definitivo nas fases eliminatórias
+        if (
+            placar_equipe_1 === placar_equipe_2 &&
+            ["Quartas", "Semifinal", "Final"].includes(confrontoAchado.fase)
+        ) {
+            return res.status(400).json({
+                msg: "Não é permitido empate nas fases eliminatórias. É necessário definir um vencedor através dos critérios de desempate."
+            });
         }
 
         await confrontoAchado.update({
             status_confronto: "Finalizado",
-            id_equipe_vencedora: id_vencedor
-        })
+            id_equipe_vencedora
+        });
 
         return res.status(200).json({
-            message: "Confronto encerrado com sucesso",
-            vencedor: id_vencedor ? `Equipe ID: ${id_vencedor}` : `Empate`,
+            message: "Confronto finalizado com sucesso.",
+            vencedor: id_equipe_vencedora
+                ? `Equipe ID: ${id_equipe_vencedora}`
+                : "Empate",
             confronto: confrontoAchado
-        })
+        });
+
     } catch (error) {
         next(error);
     }
-}
+};

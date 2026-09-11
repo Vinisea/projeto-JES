@@ -78,28 +78,24 @@ export const popularBancoInicial = async () => {
         nome_equipe: "Tigres do Campus",
         pontuacao_geral: 12,
         id_usuario: arbitro.id_usuario,
-        id_grupo: gruposDisponiveis[0]?.id_grupo || null,
       });
 
       const equipe2 = await equipe.create({
         nome_equipe: "Panteras Universitárias",
         pontuacao_geral: 9,
         id_usuario: docente.id_usuario,
-        id_grupo: gruposDisponiveis[1]?.id_grupo || null,
       });
 
       const equipe3 = await equipe.create({
         nome_equipe: "Amazônias Vôlei",
         pontuacao_geral: 15,
         id_usuario: arbitro.id_usuario,
-        id_grupo: gruposDisponiveis[2]?.id_grupo || null,
       });
 
       const equipe4 = await equipe.create({
         nome_equipe: "Cruzadas Femininas",
         pontuacao_geral: 11,
         id_usuario: docente.id_usuario,
-        id_grupo: gruposDisponiveis[3]?.id_grupo || null,
       });
 
       console.log("✅ Equipes iniciais criadas com sucesso!");
@@ -136,9 +132,6 @@ export const popularBancoInicial = async () => {
           status_confronto: "Finalizado",
           id_equipe_1: equipe1.id_equipe,
           id_equipe_2: equipe2.id_equipe,
-          id_equipe_vencedora: equipe1.id_equipe,
-          id_modalidade: modalidadesDisponiveis[0].id_modalidade,
-          id_grupo: gruposDisponiveis[0].id_grupo,
         },
         {
           data_hora: new Date("2026-09-18T19:30:00"),
@@ -149,8 +142,6 @@ export const popularBancoInicial = async () => {
           status_confronto: "Agendado",
           id_equipe_1: equipe3.id_equipe,
           id_equipe_2: equipe4.id_equipe,
-          id_modalidade: modalidadesDisponiveis[1].id_modalidade,
-          id_grupo: gruposDisponiveis[2].id_grupo,
         },
       ]);
 

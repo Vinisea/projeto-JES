@@ -11,12 +11,14 @@ import {
     iniciarConfronto,
     gerarConfrontosDoGrupo
 } from "../controllers/ConfrontoController.js";
+
 import { verifyToken } from "../middlewares/verifyToken.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 
 const router = Router();
 
 router.get("/", listarConfrontos);
+
 router.get("/:id", buscarConfrontoPorId);
 
 router.post("/gerar", verifyToken, authorizeRoles("Administrador", "Arbitro"), gerarConfrontosDoGrupo);

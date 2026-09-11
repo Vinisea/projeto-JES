@@ -7,7 +7,7 @@ const modalidades = [
     type: "Dupla",
     category: "Duplas",
     color: "orange",
-    icon: "◎",
+    icon: "◉",
   },
   {
     name: "Voleibol Masculino",
@@ -28,14 +28,14 @@ const modalidades = [
     type: "Coletivo • feminino",
     category: "Coletivos",
     color: "red",
-    icon: "◎",
+    icon: "◉",
   },
   {
     name: "Queimado Masculino",
     type: "Coletivo • masculino",
     category: "Coletivos",
     color: "purple",
-    icon: "◎",
+    icon: "◉",
   },
   {
     name: "Fut7 Masculino",
@@ -56,7 +56,7 @@ const modalidades = [
     type: "Individual",
     category: "Individuais",
     color: "blue",
-    icon: "♧",
+    icon: "◉",
   },
 ];
 
