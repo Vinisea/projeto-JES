@@ -1,8 +1,10 @@
 import { Router } from "express";
-import { buscarDashboard } from "../controllers/DashboardController.js";
+import { buscarDashboard, estatisticas, proximosJogos } from "../controllers/DashboardController.js";
 
 const router = Router();
 router.get("/", buscarDashboard);
+router.get("/estatisticas", estatisticas);
+router.get("/proximos-jogos", proximosJogos);
 
 export default router;
 

@@ -1,13 +1,16 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 
 const links = [
   { label: "Inicio", to: "/" },
   { label: "Modalidades", to: "/modalidades" },
   { label: "Jogos", to: "/ao-vivo" },
   { label: "Classificação", to: "/classificacao" },
+  { label: "Chaveamento", to: "/chaveamento" },
 ];
 
 export function NavBar() {
+  const location = useLocation();
+  const noPainel = location.pathname.startsWith("/admin");
   return (
     <header className="topbar">
       <Link className="brand" to="/">
@@ -33,9 +36,9 @@ export function NavBar() {
         ))}
       </nav>
 
-      <Link className="admin-link" to="/login">
+      <Link className={noPainel ? "admin-link panel-active" : "admin-link"} to={noPainel ? "/admin" : "/login"}>
         <span aria-hidden="true">◌</span>
-        Arbitragem
+        {noPainel ? "Painel de arbitragem" : "Arbitragem"}
       </Link>
     </header>
   );

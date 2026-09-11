@@ -1,7 +1,7 @@
 import { Op } from "sequelize";
 import { atleta, equipe, grupo, modalidade, confronto } from "../models/index.js";
 
-export const dashboard = async (req, res, next) => {
+export const buscarDashboard = async (req, res, next) => {
   try {
     const [equipes, atletas, grupos, modalidades, partidas] = await Promise.all([
       equipe.count(), atleta.count(), grupo.count(), modalidade.count(), confronto.count(),

@@ -4,15 +4,21 @@ dotenv.config()
 
 const databaseUrl = process.env.DATABASE_URL || "postgres://localhost:5432/projeto_jes";
 
-export const conn = new Sequelize(databaseUrl, {
-    dialect: "postgres",
-    dialectOptions: {
-        ssl: {
-            require: true,
-            rejectUnauthorized: false
-        }
-    },
-    logging: false
+//Quando for subir a api tem que descomentar
+// export const conn = new Sequelize(databaseUrl, {
+//     dialect: "postgres",
+//     dialectOptions: {
+//         ssl: {
+//             require: true,
+//             rejectUnauthorized: false
+//         }
+//     },
+//     logging: false
+// })
+
+export const conn = new Sequelize({
+  dialect: "sqlite",
+  storage: "./database/db.sqlite"
 })
 
 export async function testarConexao() {

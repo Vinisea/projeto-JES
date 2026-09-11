@@ -1,74 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { listarModalidades } from "../services/modalidadeService.js";
 
-const modalidades = [
-  {
-    name: "Futmesa",
-    type: "Dupla",
-    category: "Duplas",
-    color: "orange",
-    icon: "◉",
-  },
-  {
-    name: "Voleibol Masculino",
-    type: "Coletivo • masculino",
-    category: "Coletivos",
-    color: "lime",
-    icon: "◉",
-  },
-  {
-    name: "Voleibol Feminino",
-    type: "Coletivo • feminino",
-    category: "Coletivos",
-    color: "blue",
-    icon: "◉",
-  },
-  {
-    name: "Queimado Feminino",
-    type: "Coletivo • feminino",
-    category: "Coletivos",
-    color: "red",
-    icon: "◉",
-  },
-  {
-    name: "Queimado Masculino",
-    type: "Coletivo • masculino",
-    category: "Coletivos",
-    color: "purple",
-    icon: "◉",
-  },
-  {
-    name: "Fut7 Masculino",
-    type: "Coletivo • masculino",
-    category: "Coletivos",
-    color: "orange",
-    icon: "◉",
-  },
-  {
-    name: "Fut7 Feminino",
-    type: "Coletivo • feminino",
-    category: "Coletivos",
-    color: "lime",
-    icon: "◉",
-  },
-  {
-    name: "Atletismo 100m",
-    type: "Individual",
-    category: "Individuais",
-    color: "blue",
-    icon: "◉",
-  },
-];
-
-const filters = ["Todas", "Coletivos", "Individuais", "Duplas"];
+const colors = ["orange", "lime", "blue", "red", "purple"];
 
 export default function Modalidades() {
   const [selectedFilter, setSelectedFilter] = useState("Todas");
+  const [modalidades, setModalidades] = useState([]);
+  const [erro, setErro] = useState("");
+
+  useEffect(() => {
+    listarModalidades()
+      .then(setModalidades)
+      .catch(() => setErro("Não foi possível carregar as modalidades."));
+  }, []);
+
+  const filters = ["Todas", ...new Set(modalidades.map((item) => item.categoria))];
 
   const visibleSports =
     selectedFilter === "Todas"
       ? modalidades
-      : modalidades.filter((item) => item.category === selectedFilter);
+      : modalidades.filter((item) => item.categoria === selectedFilter);
 
   return (
     <main className="page-shell inner-page">
@@ -98,13 +50,13 @@ export default function Modalidades() {
       </div>
 
       <section className="sports-grid inner-grid">
-        {visibleSports.map((sport) => (
-          <Link className="sport-card" to="/ao-vivo" key={sport.name}>
-            <span className={`sport-line ${sport.color}`} />
-            <span className={`sport-icon ${sport.color}`}>{sport.icon}</span>
+        {visibleSports.map((sport, index) => (
+          <Link className="sport-card" to="/ao-vivo" key={sport.id_modalidade}>
+            <span className={`sport-line ${colors[index % colors.length]}`} />
+            <span className={`sport-icon ${colors[index % colors.length]}`}>◉</span>
             <span className="sport-content">
-              <strong>{sport.name}</strong>
-              <small>{sport.type}</small>
+              <strong>{sport.nome_modalidade}</strong>
+              <small>{sport.categoria}</small>
             </span>
             <span className="card-arrow">›</span>
           </Link>
@@ -114,6 +66,7 @@ export default function Modalidades() {
       {visibleSports.length === 0 && (
         <div className="empty-state">Nenhuma modalidade encontrada.</div>
       )}
+      {erro && <div className="empty-state">{erro}</div>}
     </main>
   );
 }
