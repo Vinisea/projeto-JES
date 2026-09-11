@@ -30,7 +30,7 @@ export const verifyToken = async (req, res, next) => {
       } else {
         message = "Erro ao validar token";
       }
-      return response.status(401).json({ message });
+      return res.status(401).json({ message });
     }
     req.usuario = verified;
     next();
