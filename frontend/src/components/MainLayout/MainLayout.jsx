@@ -1,21 +1,10 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { listarModalidades } from "../../services/modalidadeService.js";
+import { buscarRankingGeral } from "../../services/rankingService.js";
+import { listarPartidas } from "../../services/partidaService.js";
 
-const sports = [
-  { name: "Futmesa", type: "Dupla", color: "orange", icon: "◎" },
-  { name: "Voleibol Masculino", type: "Coletivo • masculino", color: "lime", icon: "◉" },
-  { name: "Voleibol Feminino", type: "Coletivo • feminino", color: "blue", icon: "◉" },
-  { name: "Queimado Feminino", type: "Coletivo • feminino", color: "red", icon: "◎" },
-  { name: "Queimado Masculino", type: "Coletivo • masculino", color: "purple", icon: "◎" },
-  { name: "Fut7 Masculino", type: "Coletivo • masculino", color: "orange", icon: "◉" },
-  { name: "Fut7 Feminino", type: "Coletivo • feminino", color: "lime", icon: "◉" },
-  { name: "Atletismo 100m", type: "Individual", color: "blue", icon: "♧" },
-];
-
-const ranking = [
-  { position: 1, team: "9º B", country: "Espanha", points: 150, color: "orange", width: "100%" },
-  { position: 2, team: "9º A", country: "Inglaterra", points: 100, color: "lime", width: "67%" },
-  { position: 3, team: "2º EM A", country: "Argentina", points: 70, color: "purple", width: "47%" },
-];
+const colors = ["orange", "lime", "blue", "red", "purple"];
 
 function SportCard({ sport }) {
   return (
@@ -32,6 +21,27 @@ function SportCard({ sport }) {
 }
 
 export function MainLayout() {
+  const [sports, setSports] = useState([]);
+  const [ranking, setRanking] = useState([]);
+  const [partidas, setPartidas] = useState([]);
+  const [erro, setErro] = useState("");
+
+  useEffect(() => {
+    Promise.allSettled([listarModalidades(), buscarRankingGeral(), listarPartidas()])
+      .then(([modalidadesResult, rankingResult, partidasResult]) => {
+        if (modalidadesResult.status === "fulfilled") setSports(modalidadesResult.value);
+        if (rankingResult.status === "fulfilled") setRanking(rankingResult.value.ranking || []);
+        if (partidasResult.status === "fulfilled") {
+          setPartidas(partidasResult.value.filter((partida) => partida.status_confronto !== "Finalizado").slice(0, 3));
+        }
+        if ([modalidadesResult, rankingResult, partidasResult].some((result) => result.status === "rejected")) {
+          setErro("Alguns dados dos jogos não puderam ser carregados.");
+        }
+      });
+  }, []);
+
+  const maiorPontuacao = Math.max(...ranking.map((item) => item.pontos_gerais), 1);
+
   return (
     <main>
       <section className="hero page-shell">
@@ -57,7 +67,37 @@ export function MainLayout() {
           <Link to="/modalidades">Ver todas →</Link>
         </div>
         <div className="sports-grid">
-          {sports.map((sport) => <SportCard key={sport.name} sport={sport} />)}
+          {sports.map((sport, index) => (
+            <SportCard
+              key={sport.id_modalidade}
+              sport={{
+                name: sport.nome_modalidade,
+                type: sport.categoria,
+                color: colors[index % colors.length],
+                icon: "◉",
+              }}
+            />
+          ))}
+          {!sports.length && !erro && <div className="empty-state">Carregando modalidades...</div>}
+        </div>
+      </section>
+
+      {erro && <div className="page-shell empty-state">{erro}</div>}
+
+      <section className="page-shell content-section home-matches">
+        <div className="section-heading">
+          <h2>Próximos confrontos</h2>
+          <Link to="/ao-vivo">Ver jogos →</Link>
+        </div>
+        <div className="home-match-list">
+          {partidas.map((partida) => (
+            <Link className="home-match" to="/chaveamento" key={partida.id_confronto}>
+              <span>{new Date(partida.data_hora).toLocaleDateString("pt-BR")}</span>
+              <strong>{partida.equipe_mandante?.nome_equipe} <small>x</small> {partida.equipe_visitante?.nome_equipe}</strong>
+              <small>{partida.modalidade?.nome_modalidade} • {partida.fase}</small>
+            </Link>
+          ))}
+          {!partidas.length && <div className="empty-state">Nenhum confronto agendado.</div>}
         </div>
       </section>
 
@@ -66,18 +106,19 @@ export function MainLayout() {
           <h2>Liderança geral</h2>
         </div>
         <div className="ranking-card">
-          {ranking.map((item) => (
-            <div className="ranking-row" key={item.position}>
-              <span className={`rank-number ${item.color}`}>{item.position}</span>
+          {ranking.slice(0, 3).map((item, index) => (
+            <div className="ranking-row" key={item.equipe}>
+              <span className={`rank-number ${colors[index % colors.length]}`}>{item.posicao}</span>
               <div className="rank-info">
                 <div className="rank-label">
-                  <span><strong>{item.team}</strong> <em>• {item.country}</em></span>
-                  <strong>{item.points} pts</strong>
+                  <span><strong>{item.equipe}</strong> <em>• JES 2026</em></span>
+                  <strong>{item.pontos_gerais} pts</strong>
                 </div>
-                <div className="rank-track"><span className={`rank-fill ${item.color}`} style={{ width: item.width }} /></div>
+                <div className="rank-track"><span className={`rank-fill ${colors[index % colors.length]}`} style={{ width: `${(item.pontos_gerais / maiorPontuacao) * 100}%` }} /></div>
               </div>
             </div>
           ))}
+          {!ranking.length && <div className="empty-state">Ainda não há resultados finalizados.</div>}
         </div>
       </section>
     </main>

@@ -5,6 +5,7 @@ import { useAuth } from "../contexts/AuthContext.jsx";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
   const navigate = useNavigate();
@@ -59,13 +60,10 @@ export default function Login() {
             onChange={(event) => setEmail(event.target.value)}
           />
           <label htmlFor="senha">Senha</label>
-          <input
-            id="senha"
-            type="password"
-            placeholder="Digite sua senha"
-            value={senha}
-            onChange={(event) => setSenha(event.target.value)}
-          />
+          <div className="password-field">
+            <input id="senha" type={mostrarSenha ? "text" : "password"} placeholder="Digite sua senha" value={senha} onChange={(event) => setSenha(event.target.value)} />
+            <button type="button" className="password-toggle" onClick={() => setMostrarSenha((atual) => !atual)} aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}>{mostrarSenha ? "◉" : "◌"}</button>
+          </div>
           {erro && <div className="form-error">{erro}</div>}
           <button className="login-button" type="submit" disabled={carregando}>
             {carregando ? "Entrando..." : "Entrar no painel"}
