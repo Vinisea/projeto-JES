@@ -3,7 +3,8 @@ import { Router } from "express";
 import {
     criarInscricao,
     listarInscricoes,
-    buscarInscricaoPorId
+    buscarInscricaoPorId,
+    removerInscricao
 } from "../controllers/InscricaoController.js";
 
 import { verifyToken } from "../middlewares/verifyToken.js";
@@ -14,6 +15,8 @@ const router = Router();
 router.get("/", listarInscricoes);
 
 router.get("/:id", verifyToken, buscarInscricaoPorId);
+router.post("/", verifyToken, criarInscricao);
+router.delete("/:id", verifyToken, removerInscricao);
 
 router.post("/", verifyToken, requireAdmin, criarInscricao);
 

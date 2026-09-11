@@ -1,5 +1,5 @@
 import { errorHandler } from "../utils/errorHandler.js";
-import { equipe, grupo, modalidade } from "../models/index.js";
+import { equipe, grupo, modalidade, confronto } from "../models/index.js";
 
 export const criarGrupo = async (req, res) => {
   const { nome, nome_grupo, id_modalidade } = req.body;
@@ -54,6 +54,11 @@ export const editarGrupo = async (req, res) => {
   try {
     const grupoEncontrado = await grupo.findByPk(id);
     if (!grupoEncontrado) return res.status(404).json({ msg: "Grupo não encontrado" });
+
+    const partidas = await confronto.count({ where: { id_grupo: id } });
+    if (partidas > 0) {
+      return res.status(409).json({ msg: "Não é possível excluir grupo com partidas vinculadas." });
+    }
     
     await grupoEncontrado.update(req.body);
     return res.status(200).json(grupoEncontrado);

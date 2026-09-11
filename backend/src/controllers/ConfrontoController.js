@@ -162,6 +162,10 @@ export const criarConfronto = async (req, res, next) => {
             id_grupo
         } = req.body;
 
+        if (id_equipe_1 === id_equipe_2) {
+            return res.status(400).json({ message: "Uma equipe não pode jogar contra ela mesma." });
+        }
+
         const equipe1 = await equipe.findByPk(id_equipe_1);
 
         if (!equipe1) {
@@ -186,12 +190,11 @@ export const criarConfronto = async (req, res, next) => {
             });
         }
 
-        const grupoEncontrado = await grupo.findByPk(id_grupo);
-
-        if (!grupoEncontrado) {
-            return res.status(404).json({
-                message: "Grupo não encontrado"
-            });
+        if (id_grupo !== undefined && id_grupo !== null) {
+            const grupoEncontrado = await grupo.findByPk(id_grupo);
+            if (!grupoEncontrado) {
+                return res.status(404).json({ message: "Grupo não encontrado" });
+            }
         }
 
         const novoConfronto = await confronto.create(req.body);
@@ -235,6 +238,10 @@ export const removerConfronto = async (req, res, next) => {
             });
         }
 
+        if (confrontoEncontrado.status_confronto === "Finalizado") {
+            return res.status(409).json({ message: "Não é possível excluir uma partida finalizada." });
+        }
+
         await confrontoEncontrado.destroy();
 
         return res.status(200).json({
@@ -255,7 +262,7 @@ export const iniciarConfronto = async (req, res, next) => {
        if (!confrontoEncontrado) return res.status(404).json({msg: "Confornto não encontrado"})
 
         //regra: só pode iniciar se estiver agendade
-        if (confrontoEncontrado.status_confronto !== "Agendado") return res.status(400).json({msg: `Apenas confrontos com status 'Agendado' podem ser iniciados. Status atual: ${confrontoEncontrado.status_confronto}.`})
+        if (confrontoEncontrado.status_confronto !== "Agendado") return res.status(409).json({msg: `Apenas confrontos com status 'Agendado' podem ser iniciados. Status atual: ${confrontoEncontrado.status_confronto}.`})
             
         await confrontoEncontrado.update({ status_confronto: 'Em andamento' });
         return res.status(200).json({msg: "Confronto inicado com sucesso", confronto: confrontoEncontrado})
@@ -274,24 +281,22 @@ export const atualizarPlacar = async (req, res, next) => {
         const confrontoAchado = await confronto.findByPk(id);
         if (!confrontoAchado) return res.status(404).json({msg: "Confronto não encontrado"})
         //Não alterar confronto que não esteja em andamento
-        if (confrontoAchado.status_confronto !== "Em andamento") 
-            return res.status(400).json(
-        {msg: `Não pe possível alterar o placar de um confronto ${confrontoAchado.status_confronto}. O confronto precisa estar 'Em andamento`}
-    )
+        if (confrontoAchado.status_confronto !== "Em andamento") return res.status(409).json({msg: `Não é possível alterar o placar de um confronto ${confrontoAchado.status_confronto}. O confronto precisa estar 'Em andamento'.`})
 
-        if (placar_equipe_1 === undefined || placar_equipe_2 === undefined) {
-            res.status(400).json({msg: "Informe os campos de 'placar_equipe_1' e 'placar_equipe_2'"})
-            return
+        const score1 = Number(placar_equipe_1);
+        const score2 = Number(placar_equipe_2);
+        if (!Number.isInteger(score1) || !Number.isInteger(score2) || score1 < 0 || score2 < 0) {
+            return res.status(400).json({msg: "Os placares devem ser números inteiros não negativos."});
         }
 
         await confrontoAchado.update({
-            placar_equipe_1: parseInt(placar_equipe_1),
-            placar_equipe_2: parseInt(placar_equipe_2)
+            placar_equipe_1: score1,
+            placar_equipe_2: score2
         });
 
         //Emite o evento "partida:atualizada" apenas para quem está na sala
         getIo().to(`partida:${id}`).emit("partida:atualizada", {
-            id_confronto: confrontoAchado.id_consfronto,
+            id_confronto: confrontoAchado.id_confronto,
             placar_equipe_1: confrontoAchado.placar_equipe_1,
             placar_equipe_2: confrontoAchado.placar_equipe_2,
             status_confronto: confrontoAchado.status_confronto
@@ -312,31 +317,20 @@ export const finalizarConfronto = async (req, res, next) => {
 
         const confrontoAchado = await confronto.findByPk(id);
 
+        if (!confrontoAchado) return res.status(404).json({msg: "Confronto não encontrado"})
+        // Não finalizar um confronto que não esteja em andamento.
+        if (confrontoAchado.status_confronto !== "Em andamento") return res.status(409).json({msg: `Não é possível finalizar um confronto ${confrontoAchado.status_confronto}.`})
+
+        //Lógica para identificar a equipe vencedora
+        let id_vencedor = null;
+        if (confrontoAchado.placar_equipe_1 > confrontoAchado.placar_equipe_2) {
+            id_vencedor = confrontoAchado.id_equipe_1
+        } else if (confrontoAchado.placar_equipe_2 > confrontoAchado.placar_equipe_1) {
+            id_vencedor = confrontoAchado.id_equipe_2
         if (!confrontoAchado) {
             return res.status(404).json({
                 msg: "Confronto não encontrado"
             });
-        }
-
-        // Só pode finalizar um confronto que esteja em andamento
-        if (confrontoAchado.status_confronto !== "Em andamento") {
-            return res.status(400).json({
-                msg: `O confronto precisa estar 'Em andamento' para ser finalizado. Status atual: ${confrontoAchado.status_confronto}.`
-            });
-        }
-
-        const {
-            placar_equipe_1,
-            placar_equipe_2
-        } = confrontoAchado;
-
-        // Determina o vencedor
-        let id_equipe_vencedora = null;
-
-        if (placar_equipe_1 > placar_equipe_2) {
-            id_equipe_vencedora = confrontoAchado.id_equipe_1;
-        } else if (placar_equipe_2 > placar_equipe_1) {
-            id_equipe_vencedora = confrontoAchado.id_equipe_2;
         }
 
         // Não permite empate definitivo nas fases eliminatórias
@@ -366,4 +360,3 @@ export const finalizarConfronto = async (req, res, next) => {
         next(error);
     }
 };
-

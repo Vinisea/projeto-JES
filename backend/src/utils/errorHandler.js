@@ -1,13 +1,15 @@
 export const errorHandler = (err, res) => {
-    console.error(err);
+    const status = err.status ||
+        (err.name === "SequelizeValidationError" ? 400 : undefined) ||
+        (err.name === "SequelizeUniqueConstraintError" ? 409 : undefined) ||
+        (err.name === "SequelizeForeignKeyConstraintError" ? 409 : undefined) ||
+        500;
+    const message = err.name === "SequelizeValidationError"
+        ? err.errors.map(({ message }) => message)
+        : err.message || "Erro interno do servidor";
 
-    if (err.name === "SequelizeValidationError") {
-        return res.status(400).json({
-            message: err.errors.map(error => error.message)
-        });
-    }
-
-    return res.status(err.status || 500).json({
-        message: err.message || "Erro interno do servidor"
-    });
+    if (status >= 500) console.error(err);
+    return res.status(status).json({ message });
 };
+
+//oi
