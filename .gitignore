@@ -1,5 +1,6 @@
 # Ignora as pastas de dependências do Front e do Back
 backend/node_modules/
+backend/database/
 frontend/node_modules/
 
 # Ignora arquivos de configuração de ambiente/segredo

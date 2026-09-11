@@ -209,7 +209,17 @@ export const criarConfronto = async (req, res, next) => {
             }
         }
 
-        const novoConfronto = await confronto.create(req.body);
+        const novoConfronto = await confronto.create({
+            ...req.body,
+            data_hora: req.body.data_hora || new Date(),
+            local_partida: req.body.local_partida || "A definir",
+            fase: req.body.fase || "Grupos",
+            status_confronto: req.body.status_confronto || "Agendado",
+            placar_equipe_1: req.body.placar_equipe_1 ?? 0,
+            placar_equipe_2: req.body.placar_equipe_2 ?? 0,
+            id_modalidade,
+            id_grupo: id_grupo ?? null,
+        });
 
         return res.status(201).json(novoConfronto);
     } catch (error) {
@@ -229,7 +239,17 @@ export const editarConfronto = async (req, res, next) => {
             });
         }
 
-        await confrontoEncontrado.update(req.body);
+        const dadosPermitidos = {};
+        for (const campo of ["data_hora", "local_partida", "placar_equipe_1", "placar_equipe_2"]) {
+            if (req.body[campo] !== undefined) dadosPermitidos[campo] = req.body[campo];
+        }
+
+        if (dadosPermitidos.data_hora === undefined) dadosPermitidos.data_hora = confrontoEncontrado.data_hora;
+        if (dadosPermitidos.local_partida === undefined) dadosPermitidos.local_partida = confrontoEncontrado.local_partida || "A definir";
+        if (dadosPermitidos.placar_equipe_1 === undefined) dadosPermitidos.placar_equipe_1 = confrontoEncontrado.placar_equipe_1 ?? 0;
+        if (dadosPermitidos.placar_equipe_2 === undefined) dadosPermitidos.placar_equipe_2 = confrontoEncontrado.placar_equipe_2 ?? 0;
+
+        await confrontoEncontrado.update(dadosPermitidos);
 
         return res.status(200).json(confrontoEncontrado);
     } catch (error) {

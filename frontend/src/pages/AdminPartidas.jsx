@@ -30,14 +30,14 @@ export default function AdminPartidas() {
 
   function editar(id) {
     const partida = partidas.find((item) => item.id_confronto === id);
-    if (partida) setFormulario({ id, data_hora: partida.data_hora.slice(0, 16), local_partida: partida.local_partida, id_equipe_1: partida.id_equipe_1, id_equipe_2: partida.id_equipe_2, id_modalidade: partida.id_modalidade, fase: partida.fase, status_confronto: partida.status_confronto, placar_equipe_1: partida.placar_equipe_1 ?? 0, placar_equipe_2: partida.placar_equipe_2 ?? 0 });
+    if (partida) setFormulario({ id, data_hora: partida.data_hora.slice(0, 16), local_partida: partida.local_partida || "A definir", placar_equipe_1: partida.placar_equipe_1 ?? 0, placar_equipe_2: partida.placar_equipe_2 ?? 0 });
   }
   async function salvar(event) {
     event.preventDefault();
     setSalvando(true);
     const { id, ...dados } = formulario;
     try {
-      const payload = { ...dados, id_equipe_1: Number(dados.id_equipe_1), id_equipe_2: Number(dados.id_equipe_2), id_modalidade: Number(dados.id_modalidade), placar_equipe_1: Number(dados.placar_equipe_1), placar_equipe_2: Number(dados.placar_equipe_2) };
+      const payload = { ...dados, placar_equipe_1: Number(dados.placar_equipe_1), placar_equipe_2: Number(dados.placar_equipe_2) };
       await editarPartida(id, payload);
       setFormulario(null); carregar();
     } catch { setError("Não foi possível cadastrar a partida."); }
@@ -92,7 +92,7 @@ export default function AdminPartidas() {
           {partida.status_confronto === "Em andamento" && <><button type="button" className="row-action" disabled={acao} onClick={() => executarAcao(id, "placar")}>Placar</button><button type="button" className="row-action" disabled={acao} onClick={() => executarAcao(id, "finalizar")}>Finalizar</button></>}
         </>;
       }}
-      children={formulario && <AdminForm title={formulario.id ? "Editar partida" : "Nova partida"} fields={[{ name: "data_hora", label: "Data e hora", type: "datetime-local" }, { name: "local_partida", label: "Local" }, { name: "id_equipe_1", label: "ID equipe mandante", type: "number" }, { name: "id_equipe_2", label: "ID equipe visitante", type: "number" }, { name: "id_modalidade", label: "ID modalidade", type: "number" }, { name: "fase", label: "Fase", type: "select", options: ["Grupos", "Quartas", "Semifinal", "Final"] }, { name: "status_confronto", label: "Status", type: "select", options: ["Agendado", "Em andamento", "Finalizado"] }, { name: "placar_equipe_1", label: "Placar mandante", type: "number", min: 0 }, { name: "placar_equipe_2", label: "Placar visitante", type: "number", min: 0 }]} values={formulario} onChange={(name, value) => setFormulario({ ...formulario, [name]: value })} onSubmit={salvar} onCancel={() => setFormulario(null)} saving={salvando} />}
+      children={formulario && <AdminForm title="Editar partida" fields={[{ name: "data_hora", label: "Data e hora", type: "datetime-local" }, { name: "local_partida", label: "Local" }, { name: "placar_equipe_1", label: "Placar mandante", type: "number", min: 0 }, { name: "placar_equipe_2", label: "Placar visitante", type: "number", min: 0 }]} values={formulario} onChange={(name, value) => setFormulario({ ...formulario, [name]: value })} onSubmit={salvar} onCancel={() => setFormulario(null)} saving={salvando} />}
     />
   );
 }
