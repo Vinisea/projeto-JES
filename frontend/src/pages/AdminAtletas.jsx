@@ -11,14 +11,20 @@ export default function AdminAtletas() {
   const [salvando, setSalvando] = useState(false);
 
   function carregar() {
-    setLoading(true);
     listarAtletas()
       .then((dados) => setAtletas(dados.rows || []))
       .catch(() => setError("Não foi possível carregar os atletas."))
       .finally(() => setLoading(false));
   }
 
-  useEffect(() => { carregar(); }, []);
+  useEffect(() => {
+    let ativo = true;
+    listarAtletas()
+      .then((dados) => { if (ativo) setAtletas(dados.rows || []); })
+      .catch(() => { if (ativo) setError("Não foi possível carregar os atletas."); })
+      .finally(() => { if (ativo) setLoading(false); });
+    return () => { ativo = false; };
+  }, []);
 
   function adicionar() { setFormulario({ id: null, nome_aluno: "", matricula: "", turma: "", id_equipe: "" }); }
   function editar(id) {

@@ -1,6 +1,6 @@
 import AdminLayout from "../components/AdminLayout.jsx";
 
-export default function AdminSimplePage({ title, description, button, rows, loading, error, onAdd, onEdit, onRemove, children }) {
+export default function AdminSimplePage({ title, description, button, rows, loading, error, onAdd, onEdit, onRemove, renderRowActions, children }) {
   return (
     <AdminLayout title={title} description={description}>
       {children}
@@ -19,6 +19,7 @@ export default function AdminSimplePage({ title, description, button, rows, load
               <span className="row-status">Ativo</span>
               {onEdit && <button type="button" className="row-action" onClick={() => onEdit(row[2])}>Editar</button>}
               {onRemove && <button type="button" className="row-action" onClick={() => onRemove(row[2])}>Excluir</button>}
+              {renderRowActions?.(row[2])}
             </div>
           ))}
           {!loading && !error && !rows.length && <div className="empty-state">Nenhum registro encontrado.</div>}

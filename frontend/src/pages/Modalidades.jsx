@@ -66,6 +66,7 @@ export default function Modalidades() {
       {visibleSports.length === 0 && (
         <div className="empty-state">Nenhuma modalidade encontrada.</div>
       )}
+      {erro && <div className="empty-state">{erro}</div>}
     </main>
   );
 }

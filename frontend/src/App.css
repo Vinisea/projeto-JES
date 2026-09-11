@@ -1605,6 +1605,18 @@
 .telao-location { margin-top:56px; color:#d4e1ea; font-size:clamp(22px,3vw,42px); font-weight:800; }
 .telao-state { margin-top:18px; color:#8bf0b1; font-size:clamp(14px,1.7vw,22px); font-weight:900; letter-spacing:.18em; }
 @media (max-width:720px) { .telao-scoreboard { grid-template-columns:1fr; gap:18px; } .telao-scoreboard strong:first-child,.telao-scoreboard strong:last-child { text-align:center; } .telao-score { justify-content:center; order:2; } .telao-scoreboard strong:first-child { order:1; } .telao-scoreboard strong:last-child { order:3; } }
+.bracket { align-items: stretch; gap: 24px; padding: 18px 6px 28px; overflow-x: auto; }
+.bracket-column { position: relative; min-width: 220px; gap: 18px; }
+.bracket-column:not(:last-child) { padding-right: 32px; }
+.bracket-column:not(:last-child)::after { content: ""; position: absolute; top: 50px; right: 8px; bottom: 24px; width: 1px; background: linear-gradient(#d7e0ea, #b9c9d7); }
+.bracket-column h4 { color: #34536c; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+.bracket-match { position: relative; border: 1px solid #d9e3eb; border-radius: 12px; background: #fff; box-shadow: 0 8px 18px rgba(28, 61, 86, .08); }
+.bracket-match::before { content: ""; position: absolute; top: 50%; right: -33px; width: 32px; height: 1px; background: #b9c9d7; }
+.bracket-match.winner { border-color: #f2b84b; box-shadow: 0 8px 20px rgba(242, 184, 75, .18); }
+.bracket-empty { border: 1px dashed #c7d4df; border-radius: 12px; color: #879aaa; background: #f8fbfd; }
+.telao-empty { min-height: 420px; gap: 16px; }
+.telao-empty > strong { margin-top: 28px; font-size: clamp(24px, 4vw, 52px); }
+.telao-empty > small { color: #b8cbd8; font-size: 16px; }
 
 /* Grupos — implementação incremental */
 .groups-header { display:flex; justify-content:space-between; align-items:end; gap:20px; }

@@ -1,23 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { listarPartidas } from "../services/partidaService.js";
+import { listarPartidasDoTelao } from "../services/partidaService.js";
 import {
   conectarPartida,
   desconectarPartida,
   ouvirAtualizacaoPartida,
   socket,
 } from "../services/socket.js";
-
-const demonstracao = {
-  id_confronto: "demo",
-  status_confronto: "Em andamento",
-  nome_modalidade: "FUTSET",
-  nome_grupo: "GRUPO A",
-  equipe_1: "1º EM A",
-  equipe_2: "2º EM B",
-  placar_equipe_1: 3,
-  placar_equipe_2: 2,
-  local_partida: "QUADRA 1",
-};
 
 function normalizarPartida(item) {
   return {
@@ -43,7 +31,7 @@ export default function Telao() {
   useEffect(() => {
     let ativo = true;
 
-    listarPartidas()
+    listarPartidasDoTelao()
       .then((resposta) => {
         if (!ativo) return;
         const lista = Array.isArray(resposta) ? resposta : resposta?.partidas ?? [];
@@ -52,14 +40,14 @@ export default function Telao() {
           .map(normalizarPartida);
         setPartidas(aoVivo);
         setPartidaSelecionada(aoVivo[0] ?? null);
-        setModoDemo(aoVivo.length === 0);
+        setModoDemo(false);
       })
       .catch(() => {
         if (!ativo) return;
-        setErro("Não foi possível conectar à API. Exibindo demonstração.");
-        setPartidas([demonstracao]);
-        setPartidaSelecionada(demonstracao);
-        setModoDemo(true);
+        setErro("Não foi possível carregar as partidas ao vivo.");
+        setPartidas([]);
+        setPartidaSelecionada(null);
+        setModoDemo(false);
       });
 
     const onConnect = () => setConectado(true);
@@ -71,9 +59,6 @@ export default function Telao() {
       ativo = false;
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
-      if (partidaSelecionada?.id_confronto && partidaSelecionada.id_confronto !== "demo") {
-        desconectarPartida(partidaSelecionada.id_confronto);
-      }
     };
   }, []);
 
@@ -84,13 +69,35 @@ export default function Telao() {
     if (!id || id === "demo") return undefined;
 
     conectarPartida(id);
-    return ouvirAtualizacaoPartida((atualizacao) => {
+    const removerListener = ouvirAtualizacaoPartida((atualizacao) => {
       if (String(atualizacao.id_confronto) !== String(id)) return;
       setPartidaSelecionada((atual) => ({ ...atual, ...atualizacao }));
     });
+    return () => {
+      removerListener();
+      desconectarPartida(id);
+    };
   }, [partidaId]);
 
-  const partida = useMemo(() => partidaSelecionada ?? partidas[0] ?? demonstracao, [partidaSelecionada, partidas]);
+  const partida = useMemo(() => partidaSelecionada ?? partidas[0] ?? null, [partidaSelecionada, partidas]);
+
+  if (!partida) {
+    return (
+      <main className="telao-page">
+        <div className="telao-status-bar">
+          <span className="telao-brand">ARENA JES</span>
+          <span className={conectado ? "telao-connection online" : "telao-connection"}>
+            {conectado ? "● CONECTADO" : "○ DESCONECTADO"}
+          </span>
+        </div>
+        <section className="telao-card telao-empty">
+          <span className="telao-live"><i /> JOGOS AO VIVO</span>
+          <strong>Nenhuma partida em andamento</strong>
+          <small>O placar aparecerá aqui quando o árbitro iniciar um confronto.</small>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="telao-page">

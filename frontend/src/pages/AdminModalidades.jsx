@@ -15,7 +15,14 @@ export default function AdminModalidades() {
     listarModalidades().then(setModalidades).catch(() => setError("Não foi possível carregar as modalidades.")).finally(() => setLoading(false));
   }
 
-  useEffect(() => { carregar(); }, []);
+  useEffect(() => {
+    let ativo = true;
+    listarModalidades()
+      .then((dados) => { if (ativo) setModalidades(dados); })
+      .catch(() => { if (ativo) setError("Não foi possível carregar as modalidades."); })
+      .finally(() => { if (ativo) setLoading(false); });
+    return () => { ativo = false; };
+  }, []);
   function adicionar() { setFormulario({ id: null, nome_modalidade: "", regras: "", categoria: "Masculino" }); }
   function editar(id) {
     const modalidade = modalidades.find((item) => item.id_modalidade === id);

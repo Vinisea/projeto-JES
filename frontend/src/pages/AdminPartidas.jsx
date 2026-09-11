@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminSimplePage from "./AdminSimplePage.jsx";
 import AdminForm from "../components/AdminForm.jsx";
-import { editarPartida, listarPartidas, removerPartida } from "../services/partidaService.js";
+import { atualizarPlacar, editarPartida, finalizarPartida, iniciarPartida, listarPartidas, removerPartida } from "../services/partidaService.js";
 
 export default function AdminPartidas() {
   const [partidas, setPartidas] = useState([]);
@@ -9,6 +9,7 @@ export default function AdminPartidas() {
   const [error, setError] = useState("");
   const [formulario, setFormulario] = useState(null);
   const [salvando, setSalvando] = useState(false);
+  const [acao, setAcao] = useState(null);
 
   function carregar() {
     setLoading(true);
@@ -49,6 +50,26 @@ export default function AdminPartidas() {
     catch { setError("Não foi possível excluir a partida."); }
   }
 
+  async function executarAcao(id, tipo) {
+    setAcao(`${tipo}:${id}`);
+    try {
+      if (tipo === "iniciar") await iniciarPartida(id);
+      if (tipo === "finalizar") await finalizarPartida(id);
+      if (tipo === "placar") {
+        const partida = partidas.find((item) => item.id_confronto === id);
+        const primeiro = window.prompt("Placar da equipe mandante:", partida?.placar_equipe_1 ?? 0);
+        const segundo = window.prompt("Placar da equipe visitante:", partida?.placar_equipe_2 ?? 0);
+        if (primeiro === null || segundo === null) return;
+        await atualizarPlacar(id, { placar_equipe_1: Number(primeiro), placar_equipe_2: Number(segundo) });
+      }
+      carregar();
+    } catch (error) {
+      setError(error.response?.data?.msg || error.response?.data?.message || "Não foi possível atualizar a partida.");
+    } finally {
+      setAcao(null);
+    }
+  }
+
   return (
     <AdminSimplePage
       title="Partidas"
@@ -63,6 +84,14 @@ export default function AdminPartidas() {
       error={error}
       onEdit={editar}
       onRemove={excluir}
+      renderRowActions={(id) => {
+        const partida = partidas.find((item) => item.id_confronto === id);
+        if (!partida) return null;
+        return <>
+          {partida.status_confronto === "Agendado" && <button type="button" className="row-action" disabled={acao} onClick={() => executarAcao(id, "iniciar")}>Iniciar</button>}
+          {partida.status_confronto === "Em andamento" && <><button type="button" className="row-action" disabled={acao} onClick={() => executarAcao(id, "placar")}>Placar</button><button type="button" className="row-action" disabled={acao} onClick={() => executarAcao(id, "finalizar")}>Finalizar</button></>}
+        </>;
+      }}
       children={formulario && <AdminForm title={formulario.id ? "Editar partida" : "Nova partida"} fields={[{ name: "data_hora", label: "Data e hora", type: "datetime-local" }, { name: "local_partida", label: "Local" }, { name: "id_equipe_1", label: "ID equipe mandante", type: "number" }, { name: "id_equipe_2", label: "ID equipe visitante", type: "number" }, { name: "id_modalidade", label: "ID modalidade", type: "number" }, { name: "fase", label: "Fase", type: "select", options: ["Grupos", "Quartas", "Semifinal", "Final"] }, { name: "status_confronto", label: "Status", type: "select", options: ["Agendado", "Em andamento", "Finalizado"] }, { name: "placar_equipe_1", label: "Placar mandante", type: "number", min: 0 }, { name: "placar_equipe_2", label: "Placar visitante", type: "number", min: 0 }]} values={formulario} onChange={(name, value) => setFormulario({ ...formulario, [name]: value })} onSubmit={salvar} onCancel={() => setFormulario(null)} saving={salvando} />}
     />
   );
