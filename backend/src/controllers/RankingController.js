@@ -10,32 +10,48 @@ const REGRAS_PONTUACAO = {
   },
 
   QUEIMADO: {
-    pontosVitoria: null,
-    pontosDerrota: null,
+    pontosVitoria: 3,
+    pontosDerrota: 0,
     usaSaldo: false,
     permiteEmpate: false,
   },
 
   VOLEIBOL: {
-    pontosVitoria: null,
-    pontosDerrota: null,
+    pontosVitoria: 3,
+    pontosDerrota: 0,
     usaSaldo: false,
     permiteEmpate: false,
   },
 
   FUTMESA: {
-    pontosVitoria: null,
-    pontosDerrota: null,
+    pontosVitoria: 3,
+    pontosDerrota: 0,
     usaSaldo: false,
     permiteEmpate: false,
   },
 
   DAMA: {
-    pontosVitoria: null,
-    pontosDerrota: null,
+    pontosVitoria: 3,
+    pontosDerrota: 0,
     usaSaldo: false,
     permiteEmpate: true,
   },
+};
+
+const normalizarNomeModalidade = (nome = "") => nome
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .toUpperCase()
+  .replace(/[^A-Z0-9]/g, "");
+
+const obterRegras = (nomeModalidade) => {
+  const nome = normalizarNomeModalidade(nomeModalidade);
+  if (nome.includes("FUTSAL")) return REGRAS_PONTUACAO.FUTSAL;
+  if (nome.includes("VOLEI")) return REGRAS_PONTUACAO.VOLEIBOL;
+  if (nome.includes("QUEIM")) return REGRAS_PONTUACAO.QUEIMADO;
+  if (nome.includes("FUTMESA")) return REGRAS_PONTUACAO.FUTMESA;
+  if (nome.includes("DAMA")) return REGRAS_PONTUACAO.DAMA;
+  return { pontosVitoria: 3, pontosDerrota: 0, usaSaldo: true, permiteEmpate: true };
 };
 
 // ==========================================
@@ -43,7 +59,7 @@ const REGRAS_PONTUACAO = {
 // ==========================================
 
 const calcularEstatisticasEquipes = (equipes, confrontos, nomeModalidade) => {
-  const regras = REGRAS_PONTUACAO[nomeModalidade];
+  const regras = obterRegras(nomeModalidade);
 
   const tabelaMap = {};
 
