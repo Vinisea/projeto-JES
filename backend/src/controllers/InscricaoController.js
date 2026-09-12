@@ -111,32 +111,3 @@ export const buscarInscricaoPorId = async (req, res, next) => {
         next(error);
     }
 };
-
-export const removerInscricao = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-
-        const inscricaoEncontrada = await inscricao.findByPk(id);
-
-        if (!inscricaoEncontrada) {
-            return res.status(404).json({
-                message: "Inscrição não encontrada"
-            });
-        }
-
-        const partidasVinculadas = await confronto.count({
-            where: { id_modalidade: inscricaoEncontrada.id_modalidade }
-        });
-
-        if (partidasVinculadas > 0) {
-            return res.status(409).json({
-                message: "Não é possível remover inscrição vinculada a partidas."
-            });
-        }
-
-        await inscricaoEncontrada.destroy();
-        return res.status(204).send();
-    } catch (error) {
-        next(error);
-    }
-};
