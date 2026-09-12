@@ -51,7 +51,7 @@ export default function Modalidades() {
 
       <section className="sports-grid inner-grid">
         {visibleSports.map((sport, index) => (
-          <Link className="sport-card" to="/ao-vivo" key={sport.id_modalidade}>
+          <Link className="sport-card" to={`/ao-vivo?modalidade=${sport.id_modalidade}`} key={sport.id_modalidade}>
             <span className={`sport-line ${colors[index % colors.length]}`} />
             <span className={`sport-icon ${colors[index % colors.length]}`}>◉</span>
             <span className="sport-content">

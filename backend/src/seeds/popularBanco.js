@@ -56,21 +56,21 @@ export async function popularBancoInicial() {
   ]);
 
   const grupos = await grupo.bulkCreate([
-    { nome_grupo: "Ensino Médio", id_modalidade: futsal.id_modalidade },
-    { nome_grupo: "Ensino Fundamental", id_modalidade: futsal.id_modalidade },
+    { nome_grupo: "6º e 7º anos", id_modalidade: futsal.id_modalidade },
+    { nome_grupo: "8º e 9º anos", id_modalidade: futsal.id_modalidade },
     { nome_grupo: "8º e 9º anos", id_modalidade: volei.id_modalidade },
-    { nome_grupo: "Ensino Médio", id_modalidade: basquete.id_modalidade },
+    { nome_grupo: "6º e 7º anos", id_modalidade: basquete.id_modalidade },
   ]);
 
   const equipes = await equipe.bulkCreate([
-    { nome_equipe: "1º EM A", pontuacao_geral: 0, id_usuario: admin.id_usuario, id_grupo: grupos[0].id_grupo },
-    { nome_equipe: "1º EM B", pontuacao_geral: 0, id_usuario: arbitro.id_usuario, id_grupo: grupos[0].id_grupo },
-    { nome_equipe: "2º EM A", pontuacao_geral: 0, id_usuario: docente.id_usuario, id_grupo: grupos[0].id_grupo },
-    { nome_equipe: "8º A", pontuacao_geral: 0, id_usuario: admin.id_usuario, id_grupo: grupos[2].id_grupo },
-    { nome_equipe: "8º B", pontuacao_geral: 0, id_usuario: arbitro.id_usuario, id_grupo: grupos[2].id_grupo },
-    { nome_equipe: "9º A", pontuacao_geral: 0, id_usuario: docente.id_usuario, id_grupo: grupos[2].id_grupo },
-    { nome_equipe: "2º EM B", pontuacao_geral: 0, id_usuario: admin.id_usuario, id_grupo: grupos[3].id_grupo },
-    { nome_equipe: "3º EM A", pontuacao_geral: 0, id_usuario: arbitro.id_usuario, id_grupo: grupos[3].id_grupo },
+    { nome_equipe: "6º A", pontuacao_geral: 0, id_usuario: admin.id_usuario, id_grupo: grupos[0].id_grupo },
+    { nome_equipe: "6º B", pontuacao_geral: 0, id_usuario: arbitro.id_usuario, id_grupo: grupos[0].id_grupo },
+    { nome_equipe: "7º A", pontuacao_geral: 0, id_usuario: docente.id_usuario, id_grupo: grupos[0].id_grupo },
+    { nome_equipe: "8º A", pontuacao_geral: 0, id_usuario: admin.id_usuario, id_grupo: grupos[1].id_grupo },
+    { nome_equipe: "8º B", pontuacao_geral: 0, id_usuario: arbitro.id_usuario, id_grupo: grupos[1].id_grupo },
+    { nome_equipe: "9º A", pontuacao_geral: 0, id_usuario: docente.id_usuario, id_grupo: grupos[1].id_grupo },
+    { nome_equipe: "8º C", pontuacao_geral: 0, id_usuario: admin.id_usuario, id_grupo: grupos[2].id_grupo },
+    { nome_equipe: "9º B", pontuacao_geral: 0, id_usuario: arbitro.id_usuario, id_grupo: grupos[2].id_grupo },
   ]);
 
   await atleta.bulkCreate(
