@@ -19,5 +19,6 @@ router.post("/", verifyToken, criarInscricao);
 router.delete("/:id", verifyToken, removerInscricao);
 
 router.post("/", verifyToken, requireAdmin, criarInscricao);
+router.delete("/:id", verifyToken, requireAdmin, removerInscricao);
 
 export default router;

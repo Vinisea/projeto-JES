@@ -22,8 +22,8 @@ export const atleta = conn.define(
         allowNull: false,
         unique: true,
         validate: {
-            isInt: {msg: "A matrícula só pode ter números"},
-            notEmpty: {msg: "A número de matrícula é obrigatório"}
+            isInt: { msg: "A matrícula só pode ter números" },
+            notEmpty: { msg: "A número de matrícula é obrigatório" }
         }
     },
     turma: {

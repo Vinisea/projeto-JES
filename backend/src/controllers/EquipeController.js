@@ -94,15 +94,15 @@ export const removerEquipe = async (req, res) => {
 };
 
 export const adicionarAtleta = async (req, res) => {
-    const { id: equipeId } = req.params
+    const { id } = req.params;
 
     try {
-        const equipeAlvo = await equipe.findByPk(equipeId);
+        const equipeAlvo = await equipe.findByPk(id);
         if (!equipeAlvo) return res.status(404).json({msg: "Equipe não encontrada"});
 
         const novoAtleta = await atleta.create({
             ...req.body,
-            id_equipe: equipeId
+            id_equipe: id
         });
         return res.status(201).json(novoAtleta)
     } catch (error) {
@@ -111,10 +111,10 @@ export const adicionarAtleta = async (req, res) => {
 };
 
 export const removerAtleta = async (req, res) => {
-    const { atletaId: id } = req.params;
+    const { atletaId } = req.params;
 
     try {
-        const atletaFiltrado = await atleta.findByPk(id);
+        const atletaFiltrado = await atleta.findByPk(atletaId);
         if (!atletaFiltrado) return res.status(404).json({ msg: "Atleta não encontrado" });
 
         await atletaFiltrado.destroy();

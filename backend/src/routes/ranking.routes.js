@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { 
-    listarRankingGeral,
-    listarRankingPorGrupo,
-    listarRankingPorModalidade,
-    listarRankingPorTurma
- } from "../controllers/RankingController.js";
+import {
+  listarRankingGeral,
+  listarRankingPorGrupo,
+  listarRankingPorModalidade,
+  listarRankingPorTurma,
+} from "../controllers/RankingController.js";
 
 const router = Router();
 

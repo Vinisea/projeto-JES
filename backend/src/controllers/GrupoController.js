@@ -55,11 +55,11 @@ export const editarGrupo = async (req, res) => {
     const grupoEncontrado = await grupo.findByPk(id);
     if (!grupoEncontrado) return res.status(404).json({ msg: "Grupo não encontrado" });
 
-    const partidas = await confronto.count({ where: { id_grupo: id } });
+    const partidas = Number(await confronto.count({ where: { id_grupo: id } }));
     if (partidas > 0) {
       return res.status(409).json({ msg: "Não é possível excluir grupo com partidas vinculadas." });
     }
-    
+
     await grupoEncontrado.update(req.body);
     return res.status(200).json(grupoEncontrado);
   } catch (error) {
@@ -147,24 +147,14 @@ export const sortearGrupos = async (req, res) => {
       return res.status(400).json({ msg: "O 'id_modalidade' é obrigatório para realizar o sorteio." });
     }
 
-    // 1. Busca a modalidade e todas as equipes inscritas nela
-    const modalidadeExistente = await modalidade.findByPk(id_modalidade, {
-      include: { model: equipe, as: 'equipes' }
-    });
+    const modalidadeExistente = await modalidade.findByPk(id_modalidade);
 
     if (!modalidadeExistente) {
       return res.status(404).json({ msg: "Modalidade não encontrada." });
     }
 
-    const equipes = modalidadeExistente.equipes;
-    if (!equipes || equipes.length === 0) {
-      return res.status(400).json({ msg: "Não há equipes inscritas nesta modalidade para sortear." });
-    }
+    let grupos = (await grupo.findAll({ where: { id_modalidade } })) || [];
 
-    // 2. Busca os grupos existentes dessa modalidade
-    let grupos = await grupo.findAll({ where: { id_modalidade } });
-
-    // Se 'quantidade_grupos' for passada e faltarem grupos, cria os que faltam (ex: Grupo A, Grupo B...)
     if (quantidade_grupos && quantidade_grupos > 0) {
       const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
       while (grupos.length < quantidade_grupos) {
@@ -178,13 +168,21 @@ export const sortearGrupos = async (req, res) => {
       }
     }
 
-    if (grupos.length === 0) {
+    if (!grupos.length) {
       return res.status(400).json({
-        msg: "Nenhum grupo encontrado para esta modalidade. Crie os grupos antes ou informe 'quantidade_grupos'."
+        msg: "Não há equipes inscritas nesta modalidade para sortear."
       });
     }
 
-    // 3. Embaralha as equipes usando o algoritmo Math.random
+    const idsGrupos = grupos.map((grupoAtual) => grupoAtual.id_grupo);
+    const equipes = (await equipe.findAll({
+      where: { id_grupo: idsGrupos }
+    })) || [];
+
+    if (!equipes.length) {
+      return res.status(400).json({ msg: "Não há equipes inscritas nesta modalidade para sortear." });
+    }
+
     const equipesEmbaralhadas = [...equipes].sort(() => Math.random() - 0.5);
 
     // 4. Distribui as equipes ciclicamente entre os grupos (Round-Robin) atualizando o id_grupo no banco
