@@ -1,20 +1,20 @@
 import { Router } from "express";
 import {
-    listarUsuario, 
-    buscarUsuarioPorId,
-    criarUsuario,
-    editarUsuario,
-    removerUsuario
+  listarUsuario,
+  buscarUsuarioPorId,
+  criarUsuario,
+  editarUsuario,
+  removerUsuario,
 } from "../controllers/UsuarioController.js";
 import { verifyToken } from "../middlewares/verifyToken.js";
+import { requireAdmin } from "../middlewares/requireAdmin.js";
 
 const router = Router();
 
-router.get("/", listarUsuario);
-router.get("/:id", buscarUsuarioPorId);
-
-router.post("/", verifyToken, criarUsuario);
-router.put("/:id", verifyToken, editarUsuario);
-router.delete("/:id", verifyToken, removerUsuario);
+router.get("/", verifyToken, requireAdmin, listarUsuario);
+router.get("/:id", verifyToken, requireAdmin, buscarUsuarioPorId);
+router.post("/", verifyToken, requireAdmin, criarUsuario);
+router.put("/:id", verifyToken, requireAdmin, editarUsuario);
+router.delete("/:id", verifyToken, requireAdmin, removerUsuario);
 
 export default router;

@@ -5,6 +5,7 @@ import { confronto } from "./Confronto.js";
 import { usuario } from "./Usuario.js";
 import { inscricao } from "./Inscricao.js";
 import { grupo } from "./Grupo.js";
+import { turma } from "./Turma.js";
 
 // Relacionamento: Usuário -> Equipe (1:N)
 
@@ -138,5 +139,6 @@ export {
     modalidade,
     confronto,
     inscricao,
-    grupo
+    grupo,
+    turma
 };

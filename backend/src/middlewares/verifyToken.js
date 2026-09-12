@@ -6,14 +6,12 @@ const JWT_SECRET = process.env.JWT_SECRET || "Segredo_Mais_Segredo_Dos_Jogos_Int
 export const verifyToken = async (req, res, next) => {
   try {
     if (!req.headers.authorization) {
-      return res.status(401).json({ msg: "Token de acesso não fornecido" });
+      return res.status(401).json({ msg: "Token de acesso não fornecido." });
     }
 
-    const token = await getToken(req);
+    const token = getToken(req);
     if (!token) {
-      return res
-        .status(401)
-        .json({ msg: "Verifique se o token está presente" });
+      return res.status(401).json({ msg: "Token de acesso não fornecido." });
     }
 
     let verified;
@@ -26,13 +24,16 @@ export const verifyToken = async (req, res, next) => {
       if (jwtError.name === "TokenExpiredError") {
         message = "Token expirado. Por favor, faça login novamente.";
       } else if (jwtError.name === "JsonWebTokenError") {
-        message = "Token Inválido. O token não confere com a chave de validação, ou o token foi adulterado.";
+        message = "Token inválido. O token não confere com a chave de validação, ou o token foi adulterado.";
       } else {
-        message = "Erro ao validar token";
+        message = "Erro ao validar token.";
       }
-      return res.status(401).json({ message });
+      return res.status(401).json({ msg: message });
     }
+
     req.usuario = verified;
-    next();
-  } catch (error) {}
+    return next();
+  } catch (error) {
+    return res.status(401).json({ msg: "Token inválido." });
+  }
 };

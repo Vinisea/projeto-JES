@@ -1,4 +1,5 @@
-import { atleta, equipe } from "../models/index.js"
+import { Op } from "sequelize";
+import { atleta, equipe, inscricao, confronto } from "../models/index.js"
 import { errorHandler } from "../utils/errorHandler.js";
 
 export const listarEquipes = async (req, res) => {
@@ -68,6 +69,20 @@ export const removerEquipe = async (req, res) => {
     try {
         const equipeFiltrada = await equipe.findByPk(id);
         if (!equipeFiltrada) return res.status(404).json({msg: "Equipe não encontrada"})
+
+        const atletasVinculados = await atleta.count({ where: { id_equipe: id } });
+        const inscricoesVinculadas = await inscricao.count({ where: { id_equipe: id } });
+        const partidasVinculadas = await confronto.count({
+            where: {
+                [Op.or]: [{ id_equipe_1: id }, { id_equipe_2: id }]
+            }
+        });
+
+        if (atletasVinculados > 0 || inscricoesVinculadas > 0 || partidasVinculadas > 0) {
+            return res.status(409).json({
+                msg: "Não é possível excluir equipe com atletas, inscrições ou partidas vinculadas."
+            });
+        }
         
         await equipeFiltrada.destroy()
         res.status(204).send()
@@ -77,15 +92,15 @@ export const removerEquipe = async (req, res) => {
 };
 
 export const adicionarAtleta = async (req, res) => {
-    const { equipeId } = req.params
+    const { id } = req.params;
 
     try {
-        const equipeAlvo = await equipe.findByPk(equipeId);
+        const equipeAlvo = await equipe.findByPk(id);
         if (!equipeAlvo) return res.status(404).json({msg: "Equipe não encontrada"});
 
         const novoAtleta = await atleta.create({
             ...req.body,
-            id_equipe: equipeId
+            id_equipe: id
         });
         return res.status(201).json(novoAtleta)
     } catch (error) {
@@ -94,10 +109,10 @@ export const adicionarAtleta = async (req, res) => {
 };
 
 export const removerAtleta = async (req, res) => {
-    const { id } = req.params;
+    const { atletaId } = req.params;
 
     try {
-        const atletaFiltrado = await atleta.findByPk(id);
+        const atletaFiltrado = await atleta.findByPk(atletaId);
         if (!atletaFiltrado) return res.status(404).json({ msg: "Atleta não encontrado" });
 
         await atletaFiltrado.destroy();
