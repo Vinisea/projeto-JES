@@ -15,8 +15,7 @@ const router = Router();
 router.get("/", listarInscricoes);
 
 router.get("/:id", verifyToken, buscarInscricaoPorId);
-router.post("/", verifyToken, criarInscricao);
-router.delete("/:id", verifyToken, removerInscricao);
+
 
 router.post("/", verifyToken, requireAdmin, criarInscricao);
 router.delete("/:id", verifyToken, requireAdmin, removerInscricao);

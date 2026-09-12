@@ -11,8 +11,8 @@ export const verifyToken = async (req, res, next) => {
 
     const token = getToken(req);
     if (!token) {
-      return res.status(401).json({ msg: "Token de acesso não fornecido." });
-    }
+  return res.status(401).json({ msg: "Header Authorization inválido. Use Bearer <token>." });
+}
 
     let verified;
 
