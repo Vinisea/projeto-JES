@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { listarPartidas } from "../services/partidaService.js";
 
 export default function JogosAoVivo() {
   const [tab, setTab] = useState("Ao vivo");
   const [jogos, setJogos] = useState([]);
   const [erro, setErro] = useState("");
+  const [searchParams] = useSearchParams();
+  const modalidade = searchParams.get("modalidade") || "";
 
   useEffect(() => {
-    listarPartidas()
+    listarPartidas(modalidade ? { modalidade } : {})
       .then(setJogos)
       .catch(() => setErro("Não foi possível carregar os jogos."));
-  }, []);
+  }, [modalidade]);
 
   const visibleGames = jogos.filter((game) =>
     tab === "Ao vivo" ? game.status_confronto === "Em andamento" : game.status_confronto === "Agendado",
@@ -21,9 +24,9 @@ export default function JogosAoVivo() {
       <section className="inner-header">
         <span className="eyebrow">JES 2026</span>
         <h1>
-          <span className="live-dot" /> Jogos ao vivo
+          <span className="live-dot" /> {modalidade ? "Jogos da modalidade" : "Jogos ao vivo"}
         </h1>
-        <p>Acompanhe os confrontos que estão acontecendo agora.</p>
+        <p>Acompanhe os confrontos que estão acontecendo agora{modalidade ? " nesta modalidade" : ""}.</p>
       </section>
 
       <div className="filters">

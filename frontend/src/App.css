@@ -1617,6 +1617,29 @@
 .telao-empty { min-height: 420px; gap: 16px; }
 .telao-empty > strong { margin-top: 28px; font-size: clamp(24px, 4vw, 52px); }
 .telao-empty > small { color: #b8cbd8; font-size: 16px; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 20px; background: rgba(10, 22, 34, .68); backdrop-filter: blur(5px); }
+.modal-card { position: relative; width: min(100%, 520px); padding: 32px; border: 1px solid #e1eaf0; border-radius: 20px; background: #fff; box-shadow: 0 24px 70px rgba(9, 31, 49, .3); }
+.modal-card h2 { margin: 8px 0; color: #17334a; }
+.modal-card p { color: #718595; }
+.modal-close { position: absolute; top: 14px; right: 16px; width: 34px; height: 34px; border: 0; border-radius: 50%; color: #5c7180; background: #edf3f7; font-size: 24px; cursor: pointer; }
+.score-inputs { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 16px; margin: 26px 0; }
+.score-inputs label { display: grid; gap: 8px; color: #506675; font-size: 12px; font-weight: 800; }
+.score-inputs input { width: 100%; padding: 14px; border: 1px solid #cad8e2; border-radius: 12px; font-size: 28px; font-weight: 800; text-align: center; }
+.score-inputs > strong { padding-bottom: 14px; color: #92a5b3; font-size: 24px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.admin-list-row { gap: 12px; }
+.row-action { border: 1px solid #d4e0e8; border-radius: 9px; color: #315a73; background: #f7fafc; font-size: 12px; font-weight: 800; cursor: pointer; transition: .2s ease; }
+.row-action:hover { border-color: #f2b84b; color: #18364b; background: #fff7e5; transform: translateY(-1px); }
+.row-action:last-of-type { color: #b45151; }
+.team-loser { color: #c56b6b !important; text-decoration: line-through; opacity: .7; }
+.bracket-match { display: grid; gap: 5px; }
+.team-choice { border: 1px solid #d9e4eb; border-radius: 12px; background: #fff; box-shadow: 0 5px 14px rgba(30, 63, 84, .06); cursor: pointer; transition: .2s ease; }
+.team-choice:hover { border-color: #f2b84b; transform: translateY(-2px); box-shadow: 0 9px 20px rgba(30, 63, 84, .12); }
+.team-choice.selected { border-color: #2f7894; background: #eef8fb; }
+.team-choice-mark { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: #fff; background: #8ea4b2; }
+.team-choice.selected .team-choice-mark { background: #2f7894; }
+.panel-button, .secondary-button { border-radius: 10px; font-weight: 800; transition: .2s ease; }
+.panel-button:hover, .secondary-button:hover { transform: translateY(-1px); box-shadow: 0 7px 16px rgba(28, 61, 86, .14); }
 
 /* Grupos — implementação incremental */
 .groups-header { display:flex; justify-content:space-between; align-items:end; gap:20px; }

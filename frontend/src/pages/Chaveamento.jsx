@@ -4,10 +4,6 @@ import { listarModalidades } from "../services/modalidadeService.js";
 
 const fases = ["Grupos", "Quartas", "Semifinal", "Final"];
 
-function confrontoLabel(confronto) {
-  return `${confronto.equipe_mandante?.nome_equipe || "A definir"} x ${confronto.equipe_visitante?.nome_equipe || "A definir"}`;
-}
-
 export default function Chaveamento() {
   const [modalidades, setModalidades] = useState([]);
   const [modalidadeSelecionada, setModalidadeSelecionada] = useState("");
@@ -64,7 +60,8 @@ export default function Chaveamento() {
                     <h4>{fase}</h4>
                     {(serie.fases[fase] || []).map((confronto) => (
                       <article className={confronto.id_equipe_vencedora ? "bracket-match winner" : "bracket-match"} key={confronto.id_confronto}>
-                        <span>{confrontoLabel(confronto)}</span>
+                        <span className={confronto.id_equipe_vencedora && confronto.id_equipe_vencedora !== confronto.id_equipe_1 ? "team-loser" : ""}>{confronto.equipe_mandante?.nome_equipe || "A definir"}</span>
+                        <span className={confronto.id_equipe_vencedora && confronto.id_equipe_vencedora !== confronto.id_equipe_2 ? "team-loser" : ""}>{confronto.equipe_visitante?.nome_equipe || "A definir"}</span>
                         <strong>{confronto.placar_equipe_1 ?? 0} <small>x</small> {confronto.placar_equipe_2 ?? 0}</strong>
                         <small>{confronto.status_confronto} • {confronto.local_partida}</small>
                       </article>

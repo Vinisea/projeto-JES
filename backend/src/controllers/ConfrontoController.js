@@ -27,6 +27,63 @@ export const gerarPartidas = (equipes, dadosPartida) => {
     return confrontos;
 };
 
+const PROXIMA_FASE = { Grupos: "Quartas", Quartas: "Semifinal", Semifinal: "Final" };
+
+async function avancarChaveamento(confrontoAtual) {
+    const proximaFase = PROXIMA_FASE[confrontoAtual.fase];
+    if (!proximaFase) return;
+
+    const confrontosDaFase = await confronto.findAll({
+        where: {
+            id_grupo: confrontoAtual.id_grupo,
+            id_modalidade: confrontoAtual.id_modalidade,
+            fase: confrontoAtual.fase,
+        },
+    });
+    if (!confrontosDaFase.length || confrontosDaFase.some((item) => item.status_confronto !== "Finalizado")) return;
+
+    const proximaExistente = await confronto.count({
+        where: { id_grupo: confrontoAtual.id_grupo, id_modalidade: confrontoAtual.id_modalidade, fase: proximaFase },
+    });
+    if (proximaExistente) return;
+
+    let classificados;
+    if (confrontoAtual.fase === "Grupos") {
+        const equipesDoGrupo = await equipe.findAll({ where: { id_grupo: confrontoAtual.id_grupo } });
+        const estatisticas = new Map(equipesDoGrupo.map((time) => [time.id_equipe, { id: time.id_equipe, pontos: 0, saldo: 0, vitorias: 0 }]));
+        confrontosDaFase.forEach((partida) => {
+            const mandante = estatisticas.get(partida.id_equipe_1);
+            const visitante = estatisticas.get(partida.id_equipe_2);
+            if (!mandante || !visitante) return;
+            const placar1 = Number(partida.placar_equipe_1) || 0;
+            const placar2 = Number(partida.placar_equipe_2) || 0;
+            mandante.saldo += placar1 - placar2;
+            visitante.saldo += placar2 - placar1;
+            if (placar1 > placar2) { mandante.pontos += 3; mandante.vitorias += 1; }
+            else if (placar2 > placar1) { visitante.pontos += 3; visitante.vitorias += 1; }
+            else { mandante.pontos += 1; visitante.pontos += 1; }
+        });
+        classificados = [...estatisticas.values()].sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias || b.saldo - a.saldo).slice(0, 4).map((item) => item.id);
+    } else {
+        classificados = confrontosDaFase.map((partida) => partida.id_equipe_vencedora).filter(Boolean);
+    }
+
+    for (let index = 0; index + 1 < classificados.length; index += 2) {
+        await confronto.create({
+            data_hora: new Date(),
+            local_partida: "A definir",
+            placar_equipe_1: 0,
+            placar_equipe_2: 0,
+            fase: proximaFase,
+            status_confronto: "Agendado",
+            id_equipe_1: classificados[index],
+            id_equipe_2: classificados[index + 1],
+            id_modalidade: confrontoAtual.id_modalidade,
+            id_grupo: confrontoAtual.id_grupo,
+        });
+    }
+}
+
 export const gerarConfrontosDoGrupo = async (req, res, next) => {
     try {
         const { id_grupo, ids_equipe, fase = "Grupos" } = req.body;
@@ -329,6 +386,7 @@ export const atualizarPlacar = async (req, res, next) => {
             placar_equipe_1: score1,
             placar_equipe_2: score2
         });
+        await avancarChaveamento(confrontoAchado);
 
         //Emite o evento "partida:atualizada" apenas para quem está na sala
         getIo().to(`partida:${id}`).emit("partida:atualizada", {

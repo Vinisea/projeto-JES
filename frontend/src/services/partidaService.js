@@ -1,7 +1,7 @@
 import api from "./api.js";
 
-export async function listarPartidas() {
-  const resposta = await api.get("/public/partidas");
+export async function listarPartidas(filtros = {}) {
+  const resposta = await api.get("/public/partidas", { params: filtros });
   return resposta.data;
 }
 
