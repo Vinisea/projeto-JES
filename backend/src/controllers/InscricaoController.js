@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import { inscricao } from "../models/Inscricao.js";
 import { equipe } from "../models/Equipe.js";
 import { modalidade } from "../models/Modalidade.js";
@@ -52,11 +53,43 @@ export const criarInscricao = async (req, res, next) => {
 
 export const listarInscricoes = async (req, res, next) => {
     try {
-        const inscricoes = await inscricao.findAll();
+        const inscricoes = await inscricao.findAll({
+            include: [
+                { model: equipe, as: "equipe", attributes: ["id_equipe", "nome_equipe"] },
+                { model: modalidade, as: "modalidade", attributes: ["id_modalidade", "nome_modalidade", "categoria"] },
+            ],
+        });
 
         return res.status(200).json(inscricoes);
     } catch (error) {
         next(error);
+    }
+};
+
+export const removerInscricao = async (req, res, next) => {
+    try {
+        const inscricaoEncontrada = await inscricao.findByPk(req.params.id);
+        if (!inscricaoEncontrada) {
+            return res.status(404).json({ message: "Inscrição não encontrada" });
+        }
+
+        const partidas = await confronto.count({
+            where: {
+                id_modalidade: inscricaoEncontrada.id_modalidade,
+                [Op.or]: [
+                    { id_equipe_1: inscricaoEncontrada.id_equipe },
+                    { id_equipe_2: inscricaoEncontrada.id_equipe },
+                ],
+            },
+        });
+        if (partidas > 0) {
+            return res.status(409).json({ message: "Não é possível remover inscrição vinculada a partidas." });
+        }
+
+        await inscricaoEncontrada.destroy();
+        return res.status(204).send();
+    } catch (error) {
+        return next(error);
     }
 };
 

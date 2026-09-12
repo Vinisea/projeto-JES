@@ -205,3 +205,47 @@ export const listarClassificacaoPublica = async (req, res, next) => {
 };
 
 export const listarRankingPublico = (req, res, next) => listarRankingGeral(req, res, next);
+
+export const listarChaveamentoPublico = async (req, res, next) => {
+  try {
+    const modalidadeId = parseId(req.query.modalidade, "modalidade");
+    const modalidades = await modalidade.findAll({
+      where: modalidadeId ? { id_modalidade: modalidadeId } : undefined,
+      include: [{
+        association: "grupos",
+        include: [
+          { association: "equipes", attributes: ["id_equipe", "nome_equipe"] },
+          {
+            association: "confrontos",
+            include: [
+              { association: "equipe_mandante", attributes: ["id_equipe", "nome_equipe"] },
+              { association: "equipe_visitante", attributes: ["id_equipe", "nome_equipe"] },
+            ],
+            order: [["data_hora", "ASC"], ["id_confronto", "ASC"]],
+          },
+        ],
+      }],
+      order: [["id_modalidade", "ASC"]],
+    });
+
+    const resultado = modalidades.map((item) => ({
+      id_modalidade: item.id_modalidade,
+      nome_modalidade: item.nome_modalidade,
+      categoria: item.categoria,
+      series: item.grupos.map((grupoAtual) => ({
+        id_grupo: grupoAtual.id_grupo,
+        nome_grupo: grupoAtual.nome_grupo,
+        fases: grupoAtual.confrontos.reduce((fases, confrontoAtual) => {
+          const fase = confrontoAtual.fase || "Grupos";
+          if (!fases[fase]) fases[fase] = [];
+          fases[fase].push(confrontoAtual);
+          return fases;
+        }, {}),
+      })),
+    }));
+
+    return res.status(200).json({ modalidades: resultado });
+  } catch (error) {
+    return next(error);
+  }
+};

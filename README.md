@@ -9,25 +9,6 @@ Aplicação web para organizar os Jogos Estudantis SESI em um só lugar. O siste
 - **Partidas ao vivo:** acompanhamento dos confrontos e placares.
 - **Dados de demonstração:** o backend cria registros iniciais automaticamente na primeira execução.
 
-## Tecnologias
-
-### Frontend
-
-- React 19
-- Vite
-- React Router
-- Axios
-- CSS
-
-### Backend
-
-- Node.js
-- Express
-- Sequelize
-- PostgreSQL
-- Socket.IO
-- JWT
-
 ## Pré-requisitos
 
 Antes de começar, instale:
@@ -93,24 +74,6 @@ As contas abaixo são criadas automaticamente pelo backend quando o banco ainda 
 | Árbitro | `arbitro@adminArena.com` | `Arbitro@123` |
 | Docente | `docente@adminArena.com` | `Docente@123` |
 
-## Comandos úteis
-
-Na pasta `backend`:
-
-```bash
-npm run dev       # inicia a API em modo de desenvolvimento
-npm test          # executa os testes
-```
-
-Na pasta `frontend`:
-
-```bash
-npm run dev       # inicia o frontend
-npm run build     # gera a versão de produção
-npm run lint      # verifica problemas no código
-npm run preview   # pré-visualiza o build de produção
-```
-
 ## Estrutura do projeto
 
 ```text
@@ -123,3 +86,87 @@ frontend/  Interface React, páginas, componentes e integração com a API
 - O backend e o frontend precisam permanecer em execução em terminais separados.
 - O arquivo `.env` não deve ser versionado, pois pode conter credenciais do banco.
 - Caso altere a porta do backend, atualize também `VITE_API_URL` no frontend.
+
+
+
+# Testes Automatizados
+
+## Como executar
+Os testes automatizados do projeto são executados utilizando Vitest para a execução da suíte de testes e Supertest para realizar requisições HTTP à API.
+
+Para executar todos os testes:
+
+```bash
+npm test
+```
+
+Também é possível executar diretamente a suíte utilizando:
+
+```bash
+npx vitest run
+```
+
+Para executar apenas um arquivo de teste:
+
+```bash
+npx vitest run tests/usuarios.test.js
+```
+
+Os testes de integração utilizam um banco de dados local exclusivo para testes, evitando alterações no banco de dados utilizado pela aplicação.
+
+## Funcionalidades avaliadas
+
+A suíte de testes avalia as principais funcionalidades da API, incluindo:
+
+- Autenticação e geração/validação de tokens;
+- Autorização de usuários e controle de acesso;
+- CRUD de usuários;
+- CRUD de turmas;
+- CRUD de modalidades;
+- CRUD de equipes;
+- CRUD de grupos;
+- Inscrições de equipes em modalidades;
+- Partidas e confrontos;
+- Resultados das partidas;
+- Ranking por grupo;
+- Ranking por modalidade;
+- Ranking geral;
+- Endpoints públicos da aplicação.
+
+## Cenários considerados
+
+Foram considerados diferentes comportamentos da API, incluindo:
+
+- Requisições realizadas com sucesso;
+- Requisições sem autenticação;
+- Requisições realizadas por usuários sem permissão;
+- Busca de recursos existentes;
+- Busca de recursos inexistentes;
+- Criação de registros com dados válidos;
+- Tentativas de criação com dados obrigatórios ausentes;
+- Tentativas de criação de registros duplicados;
+- Atualização de registros;
+- Remoção de registros;
+- Validação de regras de negócio;
+- Validação de relacionamentos entre entidades;
+- Tratamento de erros e códigos HTTP;
+- Cálculo de resultados e classificações;
+- Funcionamento de endpoints públicos.
+
+Os testes utilizam diferentes níveis de verificação, incluindo validação do status HTTP, conteúdo do corpo da resposta, existência de registros no banco de dados e comportamento das regras implementadas.
+
+## Principais resultados
+
+Na execução da suíte completa foram obtidos os seguintes resultados:
+
+- 10 arquivos de teste executados;
+- 145 testes executados;
+- 145 testes aprovados;
+- 0 testes com falha.
+
+### Resultado da execução:
+
+Test Files  10 passed (10)
+     Tests  145 passed (145)
+
+A suíte apresenta execução automatizada e permite verificar de forma repetível o funcionamento das principais funcionalidades da API, incluindo seus cenários de sucesso, validação, autenticação, autorização, erros e regras de negócio.

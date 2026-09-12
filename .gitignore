@@ -1,5 +1,6 @@
 # Ignora as pastas de dependências do Front e do Back
 backend/node_modules/
+backend/database/
 frontend/node_modules/
 
 # Ignora arquivos de configuração de ambiente/segredo
@@ -16,3 +17,28 @@ frontend/.env.development
 frontend/.env.test
 frontend/.env.production
 .env
+###### FRONT REACT
+# Logs
+frontend/logs
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
+
+frontend/node_modules
+frontend/dist
+frontend/dist-ssr
+frontend/*.local
+
+# Editor directories and files
+frontend/.vscode/*
+frontend/!.vscode/extensions.json
+frontend/.idea
+frontend/.DS_Store
+frontend/*.suo
+frontend/*.ntvs*
+frontend/*.njsproj
+frontend/*.sln
+frontend/*.sw?

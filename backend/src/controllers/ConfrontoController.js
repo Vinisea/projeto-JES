@@ -27,9 +27,66 @@ export const gerarPartidas = (equipes, dadosPartida) => {
     return confrontos;
 };
 
+const PROXIMA_FASE = { Grupos: "Quartas", Quartas: "Semifinal", Semifinal: "Final" };
+
+async function avancarChaveamento(confrontoAtual) {
+    const proximaFase = PROXIMA_FASE[confrontoAtual.fase];
+    if (!proximaFase) return;
+
+    const confrontosDaFase = await confronto.findAll({
+        where: {
+            id_grupo: confrontoAtual.id_grupo,
+            id_modalidade: confrontoAtual.id_modalidade,
+            fase: confrontoAtual.fase,
+        },
+    });
+    if (!confrontosDaFase.length || confrontosDaFase.some((item) => item.status_confronto !== "Finalizado")) return;
+
+    const proximaExistente = await confronto.count({
+        where: { id_grupo: confrontoAtual.id_grupo, id_modalidade: confrontoAtual.id_modalidade, fase: proximaFase },
+    });
+    if (proximaExistente) return;
+
+    let classificados;
+    if (confrontoAtual.fase === "Grupos") {
+        const equipesDoGrupo = await equipe.findAll({ where: { id_grupo: confrontoAtual.id_grupo } });
+        const estatisticas = new Map(equipesDoGrupo.map((time) => [time.id_equipe, { id: time.id_equipe, pontos: 0, saldo: 0, vitorias: 0 }]));
+        confrontosDaFase.forEach((partida) => {
+            const mandante = estatisticas.get(partida.id_equipe_1);
+            const visitante = estatisticas.get(partida.id_equipe_2);
+            if (!mandante || !visitante) return;
+            const placar1 = Number(partida.placar_equipe_1) || 0;
+            const placar2 = Number(partida.placar_equipe_2) || 0;
+            mandante.saldo += placar1 - placar2;
+            visitante.saldo += placar2 - placar1;
+            if (placar1 > placar2) { mandante.pontos += 3; mandante.vitorias += 1; }
+            else if (placar2 > placar1) { visitante.pontos += 3; visitante.vitorias += 1; }
+            else { mandante.pontos += 1; visitante.pontos += 1; }
+        });
+        classificados = [...estatisticas.values()].sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias || b.saldo - a.saldo).slice(0, 4).map((item) => item.id);
+    } else {
+        classificados = confrontosDaFase.map((partida) => partida.id_equipe_vencedora).filter(Boolean);
+    }
+
+    for (let index = 0; index + 1 < classificados.length; index += 2) {
+        await confronto.create({
+            data_hora: new Date(),
+            local_partida: "A definir",
+            placar_equipe_1: 0,
+            placar_equipe_2: 0,
+            fase: proximaFase,
+            status_confronto: "Agendado",
+            id_equipe_1: classificados[index],
+            id_equipe_2: classificados[index + 1],
+            id_modalidade: confrontoAtual.id_modalidade,
+            id_grupo: confrontoAtual.id_grupo,
+        });
+    }
+}
+
 export const gerarConfrontosDoGrupo = async (req, res, next) => {
     try {
-        const { id_grupo } = req.body;
+        const { id_grupo, ids_equipe, fase = "Grupos" } = req.body;
 
         const grupoEncontrado = await grupo.findByPk(id_grupo);
 
@@ -41,7 +98,8 @@ export const gerarConfrontosDoGrupo = async (req, res, next) => {
 
         const equipes = await equipe.findAll({
             where: {
-                id_grupo: id_grupo
+                id_grupo,
+                ...(Array.isArray(ids_equipe) && ids_equipe.length ? { id_equipe: ids_equipe } : {}),
             }
         });
 
@@ -56,13 +114,24 @@ export const gerarConfrontosDoGrupo = async (req, res, next) => {
             id_grupo: id_grupo,
             data_hora: new Date(),
             local_partida: "A definir",
-            fase: "Quartas",
+            fase,
             status_confronto: "Agendado"
         };
 
         const confrontos = gerarPartidas(equipes, dadosPartida);
 
-        const confrontosCriados = await confronto.bulkCreate(confrontos);
+        const existentes = await confronto.findAll({
+            where: { id_grupo, fase, id_modalidade: grupoEncontrado.id_modalidade },
+            attributes: ["id_equipe_1", "id_equipe_2"],
+        });
+        const paresExistentes = new Set(
+            existentes.map((item) => [item.id_equipe_1, item.id_equipe_2].sort((a, b) => a - b).join(":")),
+        );
+        const novosConfrontos = confrontos.filter((item) => {
+            const chave = [item.id_equipe_1, item.id_equipe_2].sort((a, b) => a - b).join(":");
+            return !paresExistentes.has(chave);
+        });
+        const confrontosCriados = await confronto.bulkCreate(novosConfrontos);
 
         return res.status(201).json({
             message: "Confrontos gerados com sucesso.",
@@ -162,6 +231,10 @@ export const criarConfronto = async (req, res, next) => {
             id_grupo
         } = req.body;
 
+        if (id_equipe_1 === id_equipe_2) {
+            return res.status(400).json({ message: "Uma equipe não pode jogar contra ela mesma." });
+        }
+
         const equipe1 = await equipe.findByPk(id_equipe_1);
 
         if (!equipe1) {
@@ -186,15 +259,24 @@ export const criarConfronto = async (req, res, next) => {
             });
         }
 
-        const grupoEncontrado = await grupo.findByPk(id_grupo);
-
-        if (!grupoEncontrado) {
-            return res.status(404).json({
-                message: "Grupo não encontrado"
-            });
+        if (id_grupo !== undefined && id_grupo !== null) {
+            const grupoEncontrado = await grupo.findByPk(id_grupo);
+            if (!grupoEncontrado) {
+                return res.status(404).json({ message: "Grupo não encontrado" });
+            }
         }
 
-        const novoConfronto = await confronto.create(req.body);
+        const novoConfronto = await confronto.create({
+            ...req.body,
+            data_hora: req.body.data_hora || new Date(),
+            local_partida: req.body.local_partida || "A definir",
+            fase: req.body.fase || "Grupos",
+            status_confronto: req.body.status_confronto || "Agendado",
+            placar_equipe_1: req.body.placar_equipe_1 ?? 0,
+            placar_equipe_2: req.body.placar_equipe_2 ?? 0,
+            id_modalidade,
+            id_grupo: id_grupo ?? null,
+        });
 
         return res.status(201).json(novoConfronto);
     } catch (error) {
@@ -214,7 +296,17 @@ export const editarConfronto = async (req, res, next) => {
             });
         }
 
-        await confrontoEncontrado.update(req.body);
+        const dadosPermitidos = {};
+        for (const campo of ["data_hora", "local_partida", "placar_equipe_1", "placar_equipe_2"]) {
+            if (req.body[campo] !== undefined) dadosPermitidos[campo] = req.body[campo];
+        }
+
+        if (dadosPermitidos.data_hora === undefined) dadosPermitidos.data_hora = confrontoEncontrado.data_hora;
+        if (dadosPermitidos.local_partida === undefined) dadosPermitidos.local_partida = confrontoEncontrado.local_partida || "A definir";
+        if (dadosPermitidos.placar_equipe_1 === undefined) dadosPermitidos.placar_equipe_1 = confrontoEncontrado.placar_equipe_1 ?? 0;
+        if (dadosPermitidos.placar_equipe_2 === undefined) dadosPermitidos.placar_equipe_2 = confrontoEncontrado.placar_equipe_2 ?? 0;
+
+        await confrontoEncontrado.update(dadosPermitidos);
 
         return res.status(200).json(confrontoEncontrado);
     } catch (error) {
@@ -233,6 +325,10 @@ export const removerConfronto = async (req, res, next) => {
             return res.status(404).json({
                 message: "Confronto não encontrado"
             });
+        }
+
+        if (confrontoEncontrado.status_confronto === "Finalizado") {
+            return res.status(409).json({ message: "Não é possível excluir uma partida finalizada." });
         }
 
         await confrontoEncontrado.destroy();
@@ -255,9 +351,13 @@ export const iniciarConfronto = async (req, res, next) => {
        if (!confrontoEncontrado) return res.status(404).json({msg: "Confornto não encontrado"})
 
         //regra: só pode iniciar se estiver agendade
-        if (confrontoEncontrado.status_confronto !== "Agendado") return res.status(400).json({msg: `Apenas confrontos com status 'Agendado' podem ser iniciados. Status atual: ${confrontoEncontrado.status_confronto}.`})
+        if (confrontoEncontrado.status_confronto !== "Agendado") return res.status(409).json({msg: `Apenas confrontos com status 'Agendado' podem ser iniciados. Status atual: ${confrontoEncontrado.status_confronto}.`})
             
         await confrontoEncontrado.update({ status_confronto: 'Em andamento' });
+        getIo().to(`partida:${id}`).emit("partida:atualizada", {
+            id_confronto: confrontoEncontrado.id_confronto,
+            status_confronto: confrontoEncontrado.status_confronto,
+        });
         return res.status(200).json({msg: "Confronto inicado com sucesso", confronto: confrontoEncontrado})
         } catch (error) {
         next(error)
@@ -274,24 +374,23 @@ export const atualizarPlacar = async (req, res, next) => {
         const confrontoAchado = await confronto.findByPk(id);
         if (!confrontoAchado) return res.status(404).json({msg: "Confronto não encontrado"})
         //Não alterar confronto que não esteja em andamento
-        if (confrontoAchado.status_confronto !== "Em andamento") 
-            return res.status(400).json(
-        {msg: `Não pe possível alterar o placar de um confronto ${confrontoAchado.status_confronto}. O confronto precisa estar 'Em andamento`}
-    )
+        if (confrontoAchado.status_confronto !== "Em andamento") return res.status(409).json({msg: `Não é possível alterar o placar de um confronto ${confrontoAchado.status_confronto}. O confronto precisa estar 'Em andamento'.`})
 
-        if (placar_equipe_1 === undefined || placar_equipe_2 === undefined) {
-            res.status(400).json({msg: "Informe os campos de 'placar_equipe_1' e 'placar_equipe_2'"})
-            return
+        const score1 = Number(placar_equipe_1);
+        const score2 = Number(placar_equipe_2);
+        if (!Number.isInteger(score1) || !Number.isInteger(score2) || score1 < 0 || score2 < 0) {
+            return res.status(400).json({msg: "Os placares devem ser números inteiros não negativos."});
         }
 
         await confrontoAchado.update({
-            placar_equipe_1: parseInt(placar_equipe_1),
-            placar_equipe_2: parseInt(placar_equipe_2)
+            placar_equipe_1: score1,
+            placar_equipe_2: score2
         });
+        await avancarChaveamento(confrontoAchado);
 
         //Emite o evento "partida:atualizada" apenas para quem está na sala
         getIo().to(`partida:${id}`).emit("partida:atualizada", {
-            id_confronto: confrontoAchado.id_consfronto,
+            id_confronto: confrontoAchado.id_confronto,
             placar_equipe_1: confrontoAchado.placar_equipe_1,
             placar_equipe_2: confrontoAchado.placar_equipe_2,
             status_confronto: confrontoAchado.status_confronto
@@ -312,36 +411,18 @@ export const finalizarConfronto = async (req, res, next) => {
 
         const confrontoAchado = await confronto.findByPk(id);
 
-        if (!confrontoAchado) {
-            return res.status(404).json({
-                msg: "Confronto não encontrado"
-            });
+        if (!confrontoAchado) return res.status(404).json({msg: "Confronto não encontrado"})
+        // Não finalizar um confronto que não esteja em andamento.
+        if (confrontoAchado.status_confronto !== "Em andamento") return res.status(409).json({msg: `Não é possível finalizar um confronto ${confrontoAchado.status_confronto}.`})
+
+        let id_vencedor = null;
+        if (confrontoAchado.placar_equipe_1 > confrontoAchado.placar_equipe_2) {
+            id_vencedor = confrontoAchado.id_equipe_1
+        } else if (confrontoAchado.placar_equipe_2 > confrontoAchado.placar_equipe_1) {
+            id_vencedor = confrontoAchado.id_equipe_2
         }
-
-        // Só pode finalizar um confronto que esteja em andamento
-        if (confrontoAchado.status_confronto !== "Em andamento") {
-            return res.status(400).json({
-                msg: `O confronto precisa estar 'Em andamento' para ser finalizado. Status atual: ${confrontoAchado.status_confronto}.`
-            });
-        }
-
-        const {
-            placar_equipe_1,
-            placar_equipe_2
-        } = confrontoAchado;
-
-        // Determina o vencedor
-        let id_equipe_vencedora = null;
-
-        if (placar_equipe_1 > placar_equipe_2) {
-            id_equipe_vencedora = confrontoAchado.id_equipe_1;
-        } else if (placar_equipe_2 > placar_equipe_1) {
-            id_equipe_vencedora = confrontoAchado.id_equipe_2;
-        }
-
-        // Não permite empate definitivo nas fases eliminatórias
         if (
-            placar_equipe_1 === placar_equipe_2 &&
+            confrontoAchado.placar_equipe_1 === confrontoAchado.placar_equipe_2 &&
             ["Quartas", "Semifinal", "Final"].includes(confrontoAchado.fase)
         ) {
             return res.status(400).json({
@@ -351,13 +432,20 @@ export const finalizarConfronto = async (req, res, next) => {
 
         await confrontoAchado.update({
             status_confronto: "Finalizado",
-            id_equipe_vencedora
+            id_equipe_vencedora: id_vencedor
+        });
+        getIo().to(`partida:${id}`).emit("partida:atualizada", {
+            id_confronto: confrontoAchado.id_confronto,
+            placar_equipe_1: confrontoAchado.placar_equipe_1,
+            placar_equipe_2: confrontoAchado.placar_equipe_2,
+            status_confronto: confrontoAchado.status_confronto,
+            id_equipe_vencedora: id_vencedor,
         });
 
         return res.status(200).json({
             message: "Confronto finalizado com sucesso.",
-            vencedor: id_equipe_vencedora
-                ? `Equipe ID: ${id_equipe_vencedora}`
+            vencedor: id_vencedor
+                ? `Equipe ID: ${id_vencedor}`
                 : "Empate",
             confronto: confrontoAchado
         });
@@ -366,4 +454,3 @@ export const finalizarConfronto = async (req, res, next) => {
         next(error);
     }
 };
-

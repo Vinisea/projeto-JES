@@ -9,7 +9,7 @@ export const listarEquipes = async (req, res) => {
 
     try {
         const equipeLista = await equipe.findAndCountAll({
-            include: { model: atleta, as: "atletas"},
+            include: { model: atleta, as: "atletas" },
             distinct: true,
             offset,
             limit
@@ -30,7 +30,7 @@ export const buscarEquipePorId = async (req, res) => {
 
     try {
         const equipeFiltrada = await equipe.findByPk(id, {
-            include: { model: atleta, as: "atletas"}
+            include: { model: atleta, as: "atletas" }
         })
 
         if (!equipeFiltrada) return res.status(404).json({msg: "Equipe não encontrada"})
@@ -70,18 +70,20 @@ export const removerEquipe = async (req, res) => {
         const equipeFiltrada = await equipe.findByPk(id);
         if (!equipeFiltrada) return res.status(404).json({msg: "Equipe não encontrada"})
 
-        const atletasVinculados = await atleta.count({ where: { id_equipe: id } });
-        const inscricoesVinculadas = await inscricao.count({ where: { id_equipe: id } });
-        const partidasVinculadas = await confronto.count({
-            where: {
-                [Op.or]: [{ id_equipe_1: id }, { id_equipe_2: id }]
-            }
-        });
-
-        if (atletasVinculados > 0 || inscricoesVinculadas > 0 || partidasVinculadas > 0) {
-            return res.status(409).json({
-                msg: "Não é possível excluir equipe com atletas, inscrições ou partidas vinculadas."
-            });
+        const [atletas, inscricoes, confrontos] = await Promise.all([
+            atleta.count({ where: { id_equipe: id } }),
+            inscricao.count({ where: { id_equipe: id } }),
+            confronto.count({
+                where: {
+                    [Op.or]: [
+                        { id_equipe_1: id },
+                        { id_equipe_2: id },
+                    ],
+                },
+            }),
+        ]);
+        if (atletas || inscricoes || confrontos) {
+            return res.status(409).json({ msg: "Não é possível excluir equipe com atletas, inscrições ou partidas vinculadas." });
         }
         
         await equipeFiltrada.destroy()
@@ -129,7 +131,7 @@ export const listarAtletas = async (req, res) => {
 
     try {
         const atletaLista = await atleta.findAndCountAll({
-            include: { model: equipe },
+            include: { model: equipe, as: "equipe" },
             offset,
             limit
         });

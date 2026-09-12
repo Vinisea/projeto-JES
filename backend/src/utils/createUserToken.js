@@ -9,8 +9,7 @@ export const createUserToken = async (usuario, request, response) => {
             {
                 id: usuario.id_usuario,
                 email: usuario.email,
-                idade: usuario.idade,
-                tipo_usuario: usuario.tipo_usuario
+                tipo_usuario: usuario.tipo_usuario,
             },
             JWT_SECRET,
             {
@@ -23,7 +22,13 @@ export const createUserToken = async (usuario, request, response) => {
             statusCode: 200,
             message: "Você está autenticado",
             token: token,
-            usuarioId: usuario.id_usuario
+            usuarioId: usuario.id_usuario,
+            usuario: {
+                id_usuario: usuario.id_usuario,
+                nome: usuario.nome,
+                email: usuario.email,
+                tipo_usuario: usuario.tipo_usuario,
+            },
         })
     } catch (error) {
         await errorHandler(error, response)

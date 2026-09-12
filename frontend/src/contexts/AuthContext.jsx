@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useMemo, useState } from "react";
 import {
   fazerLogin,
@@ -10,7 +11,7 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(obterToken());
-  const [usuario, setUsuario] = useState(obterUsuario());
+  const [usuario, setUsuario] = useState(() => obterUsuario());
 
   async function login(email, senha) {
     const dados = await fazerLogin(email, senha);

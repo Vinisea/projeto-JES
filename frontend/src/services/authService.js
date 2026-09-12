@@ -1,5 +1,18 @@
 import api from "./api.js";
 
+const TOKEN_EXPIRATION_KEY = "jes_token_expira_em";
+
+function obterExpiracao(token) {
+  try {
+    const partePayload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padding = "=".repeat((4 - (partePayload.length % 4)) % 4);
+    const payload = JSON.parse(atob(partePayload + padding));
+    return payload.exp ? payload.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function fazerLogin(email, senha) {
   const resposta = await api.post("/auth/login", { email, senha });
 
@@ -9,6 +22,8 @@ export async function fazerLogin(email, senha) {
 
   if (token) {
     localStorage.setItem("jes_token", token);
+    const expiracao = obterExpiracao(token);
+    if (expiracao) localStorage.setItem(TOKEN_EXPIRATION_KEY, String(expiracao));
   }
 
   if (usuario) {
@@ -20,11 +35,20 @@ export async function fazerLogin(email, senha) {
 
 export function sair() {
   localStorage.removeItem("jes_token");
+  localStorage.removeItem(TOKEN_EXPIRATION_KEY);
   localStorage.removeItem("jes_usuario");
 }
 
 export function obterToken() {
-  return localStorage.getItem("jes_token");
+  const token = localStorage.getItem("jes_token");
+  const expiracaoSalva = Number(localStorage.getItem(TOKEN_EXPIRATION_KEY));
+  const expiracao = expiracaoSalva || obterExpiracao(token);
+  if (token && expiracao && Date.now() >= expiracao) {
+    sair();
+    return null;
+  }
+  if (token && expiracao && !expiracaoSalva) localStorage.setItem(TOKEN_EXPIRATION_KEY, String(expiracao));
+  return token;
 }
 
 export function obterUsuario() {

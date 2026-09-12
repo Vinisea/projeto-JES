@@ -7,7 +7,7 @@ export const listarAtletas = async (req, res) => {
 
     try {
         const listaAtletas = await atleta.findAndCountAll({
-            include: {model: equipe},
+            include: {model: equipe, as: "equipe", attributes: ["id_equipe", "nome_equipe"]},
             limit,
             offset
         })
@@ -23,7 +23,7 @@ export const buscarAtletaPorId = async (req, res) => {
     const { id } = req.params
     try {
     const atletaFiltrado = await atleta.findByPk(id, {
-        include: {model: equipe}
+        include: {model: equipe, as: "equipe", attributes: ["id_equipe", "nome_equipe"]}
     });
     if (!atletaFiltrado) return res.status(404).json({msg: "Esse ID não corresponde a nenhum atleta cadastrado"})
 

@@ -12,9 +12,11 @@ import AdminAtletas from "./pages/AdminAtletas.jsx";
 import AdminEquipes from "./pages/AdminEquipes.jsx";
 import AdminPartidas from "./pages/AdminPartidas.jsx";
 import AdminRegulamento from "./pages/AdminRegulamento.jsx";
+import AdminModalidades from "./pages/AdminModalidades.jsx";
+import Chaveamento from "./pages/Chaveamento.jsx";
+import AdminChaveamento from "./pages/AdminChaveamento.jsx";
+import Telao from "./pages/Telao.jsx";
 import Grupos from "./pages/Grupos.jsx";
-import Partidas from "./pages/Partidas.jsx";
-import DashboardCompeticao from "./pages/DashboardCompeticao.jsx";
 
 function NotFound() {
   return (
@@ -37,17 +39,21 @@ export default function App() {
         <Route path="/" element={<MainLayout />} />
         <Route path="/modalidades" element={<Modalidades />} />
         <Route path="/ao-vivo" element={<JogosAoVivo />} />
+        <Route path="/classificacao" element={<Ranking />} />
         <Route path="/Ranking" element={<Ranking />} />
+        <Route path="/chaveamento" element={<Chaveamento />} />
+        <Route path="/telao" element={<Telao />} />
         <Route path="/grupos" element={<Grupos />} />
-        <Route path="/partidas" element={<Partidas />} />
-        <Route path="/dashboard/competicao" element={<DashboardCompeticao />} />
         <Route path="/login" element={<Login />} />
 
         <Route element={<PrivateRoute />}>
           <Route path="/admin" element={<Dashboard />} />
           <Route path="/admin/atletas" element={<AdminAtletas />} />
+          <Route path="/admin/modalidades" element={<AdminModalidades />} />
           <Route path="/admin/equipes" element={<AdminEquipes />} />
           <Route path="/admin/partidas" element={<AdminPartidas />} />
+          <Route path="/admin/chaveamento" element={<AdminChaveamento />} />
+          <Route path="/admin/grupos" element={<Grupos />} />
           <Route path="/admin/regulamento" element={<AdminRegulamento />} />
         </Route>
 
